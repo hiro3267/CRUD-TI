@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 import json
+
+ativos = []
 
 # janela
 janela = tk.Tk()
@@ -84,6 +87,8 @@ categorias = [
 
 frames_categorias = {}
 
+ids_existentes = set()
+
 for idendificador in categorias:
 
     frame = tk.LabelFrame(
@@ -118,7 +123,7 @@ entrada = tk.Entry(
     frame_controle,
     validate='key',
     validatecommand=(vcmd, '%P'),
-    fg='grey'
+    fg='black'
     )
 
 entrada.pack(side='left', fill='x', expand=True, padx=(0,10))
@@ -164,8 +169,24 @@ def adicionar_item():
     
     categoria = categoria_var.get()
 
+    if texto in ids_existentes:
+        messagebox.showwarning(
+            'Duplicado',
+            'Esse identificador já existe.'
+        )
+        return
+    
+    ids_existentes.add(texto)
+
+    if not frames_categorias[categoria].winfo_ismapped():
+        frames_categorias[categoria].pack(
+            fill='x',
+            padx=10,
+            pady=5
+        )
+
     numero = len(
-        frames_categorias[categoria].winfo_children()
+        frames_categorias[categoria].pack_slaves()
     ) + 1
 
     # frame do item
@@ -189,6 +210,27 @@ def adicionar_item():
     )
 
     botao_item.pack(fill='x')
+
+    # botão excluir
+    def excluir_item():
+        ids_existentes.remove(texto)
+
+        item_frame.destroy()
+
+        if not frames_categorias[categoria].winfo_children():
+
+            frames_categorias[categoria].pack_forget()
+
+    botao_excluir = tk.Button(
+        item_frame,
+        text='Excluir',
+        fg='white',
+        bg='red',
+        cursor='hand2',
+        command=excluir_item
+    )
+
+    botao_excluir.pack(anchor='e', padx=5, pady=2)
 
     # area de detalhes
     detalhes = tk.Frame(item_frame)
@@ -287,32 +329,211 @@ def adicionar_item():
     ).pack(side='left')
 
     # Vulnerabilidades
-    frame_vul = tk.Frame(detalhes)
-    frame_vul.pack(fill='x', pady=2)
+    frame_vul = tk.LabelFrame(
+        detalhes,
+        text='Vulnerabilidades',
+        padx=5,
+        pady=5
+    )
+    frame_vul.pack(fill='x', pady=5)
 
-    tk.Label(
+    lista_vul = tk.Frame(frame_vul)
+    lista_vul.pack(fill='x')
+
+    # adicionar vulnerabilidade
+    def adicionar_vul():
+        numero_vul = len(
+            lista_vul.winfo_children()
+        ) + 1
+
+        vul_frame = tk.Frame(
+            lista_vul,
+            bd=1,
+            relief='solid'
+        )
+
+        vul_frame.pack(fill='x', pady=3)
+
+        # topo
+        topo_vul = tk.Frame(vul_frame)
+        topo_vul.pack(fill='x')
+
+        botao_vul = tk.Button(
+            topo_vul,
+            text=f'Vulnerabilidade {numero_vul}',
+            relief='flat',
+            anchor='w'
+        )
+
+        botao_vul.pack(
+            side='left',
+            fill='x',
+            expand=True
+        )
+
+    # excluir vulnerabilidade
+        def excluir_vul():
+            vul_frame.destroy()
+
+        botao_excluir_vul = tk.Button(
+            topo_vul,
+            text='x',
+            bg='red',
+            fg='white',
+            width=3,
+            command=excluir_vul,
+            cursor='hand2'
+        )
+
+        botao_excluir_vul.pack(side='right')
+
+        # detalhes vulnerabilidade
+        detalhes_vul = tk.Frame(vul_frame)
+
+        # descrição
+        frame_desc = tk.Frame(detalhes_vul)
+        frame_desc.pack(fill='x', pady=2)
+
+        tk.Label(
+            frame_desc,
+            text='Descrição:',
+            width=15,
+            anchor='w'
+        ).pack(side='left')
+
+        entry_desc = tk.Entry(frame_desc)
+
+        entry_desc.pack(
+            side='left',
+            fill='x',
+            expand=True
+        )
+
+        # tipo
+        frame_tipo = tk.Frame(detalhes_vul)
+        frame_tipo.pack(fill='x', pady=2)
+
+        tk.Label(
+            frame_tipo,
+            text='Tipo:',
+            width=15,
+            anchor='w'
+        ).pack(side='left')
+
+        combo_tipo = ttk.Combobox(
+            frame_tipo,
+            values=[
+                'Software',
+                'Hardware',
+                'Rede',
+                'Configuração'
+            ],
+            state='readonly'
+        )
+
+        combo_tipo.pack(
+            side='left',
+            fill='x',
+            expand=True
+        )
+
+        # severidade
+        frame_sev = tk.Frame(detalhes_vul)
+        frame_sev.pack(fill='x', pady=2)
+
+        tk.Label(
+            frame_sev,
+            text='Severidade:',
+            width=15,
+            anchor='w'
+        ).pack(side='left')
+
+        combo_sev = ttk.Combobox(
+            frame_sev,
+            values=[
+                'Baixa',
+                'Média',
+                'Alta',
+                'Crítica'
+            ],
+            state='readonly'
+        )
+
+        combo_sev.pack(
+            side='left',
+            fill='x',
+            expand=True
+        )
+
+        # status
+        frame_status = tk.Frame(detalhes_vul)
+        frame_status.pack(fill='x', pady=2)
+
+        tk.Label(
+            frame_status,
+            text='Status:',
+            width=15,
+            anchor='w'
+        ).pack(side='left')
+
+        combo_status = ttk.Combobox(
+            frame_status,
+            values=[
+                'Aberta',
+                'Em tratamento',
+                'Corrigida',
+                'Aceita'
+            ],
+            state='readonly'
+        )
+
+        combo_status.pack(
+            side='left',
+            fill='x',
+            expand=True
+        )
+
+        # expandir/recolher
+        visivel = False
+
+        def alternar_vul():
+
+            nonlocal visivel
+
+            if visivel:
+                detalhes_vul.pack_forget()
+            else:
+                detalhes_vul.pack(
+                    fill='x',
+                    padx=10,
+                    pady=5
+                )
+
+            visivel = not visivel
+
+        botao_vul.config(command=alternar_vul)
+
+    # botão adicionar vulnerabilidade
+    botao_add_vul = tk.Button(
         frame_vul,
-        text='Vulnerabilidades:',
-        width=18,
-        anchor='w'
-    ).pack(side='left')
+        text='Adicionar Vulnerabilidade',
+        command=adicionar_vul,
+        cursor='hand2'
+    )
 
-    entry_vul = tk.Entry(frame_vul)
-
-    entry_vul.pack(
-        side='left',
+    botao_add_vul.pack(
         fill='x',
-        expand=True
+        pady=5
     )
 
     # Dicionário
     ativo = {
         'id': texto,
         'categoria': categoria,
-        'hostname': entry_host,
-        'responsável': entry_resp,
-        'setor': entry_setor,
-        'vulnerabilidades': entry_vul
+        'hostname': entry_host.get(),
+        'responsável': entry_resp.get(),
+        'setor': entry_setor.get(),
+        'vulnerabilidades': []
     }
 
     #visibilidade dos detalhes
