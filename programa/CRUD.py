@@ -225,8 +225,6 @@ def adicionar_item():
 
     entry_host = tk.Entry(frame_host)
 
-    entry_host.insert(0, f'HOST-{texto}')
-
     entry_host.pack(
         side='left',
         fill='x',
@@ -239,7 +237,7 @@ def adicionar_item():
 
     tk.Label(
         frame_resp,
-        text='Responsável',
+        text='Responsável:',
         width=18,
         anchor='w'
     ).pack(side='left')
@@ -276,26 +274,24 @@ def adicionar_item():
     frame_ativo.pack(fill='x', pady=2)
 
     tk.Label(
-        detalhes,
+        frame_ativo,
         text='Tipo de ativo:',
         width=18,
         anchor='w'
     ).pack(side='left')
 
-    entry_ativo = tk.Entry(frame_ativo)
-
-    entry_ativo.pack(
-        side='left',
-        fill='x',
-        expand=True
-    )
+    tk.Label(
+        frame_ativo,
+        text=categoria,
+        anchor='w'
+    ).pack(side='left')
 
     # Vulnerabilidades
     frame_vul = tk.Frame(detalhes)
     frame_vul.pack(fill='x', pady=2)
 
     tk.Label(
-        detalhes,
+        frame_vul,
         text='Vulnerabilidades:',
         width=18,
         anchor='w'
@@ -308,6 +304,16 @@ def adicionar_item():
         fill='x',
         expand=True
     )
+
+    # Dicionário
+    ativo = {
+        'id': texto,
+        'categoria': categoria,
+        'hostname': entry_host,
+        'responsável': entry_resp,
+        'setor': entry_setor,
+        'vulnerabilidades': entry_vul
+    }
 
     #visibilidade dos detalhes
     detalhes_visi = False
