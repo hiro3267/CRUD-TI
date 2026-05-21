@@ -168,15 +168,84 @@ def adicionar_item():
         frames_categorias[categoria].winfo_children()
     ) + 1
 
-    label = tk.Label(
+    # frame do item
+    item_frame = tk.Frame(
         frames_categorias[categoria],
-        text=f"{numero}. {texto}",
-        anchor='w'
+        bd=1,
+        relief='solid'
     )
 
-    label.pack(fill='x', pady=2)
+    item_frame.pack(
+        fill='x',
+        pady=3
+    )
 
-    entrada.delete(0, tk.END)
+    # botão principal
+    botao_item = tk.Button(
+        item_frame,
+        text=f"{numero}. {texto}",
+        anchor='w',
+        relief='flat'
+    )
+
+    botao_item.pack(fill='x')
+
+    # area de detalhes
+    detalhes = tk.Frame(item_frame)
+
+    # informações extras
+    tk.Label(
+        detalhes,
+        text='Identificador Único: ',
+        anchor='w'
+    ).pack(fill='x')
+
+    tk.Label(
+        detalhes,
+        text='Hostname: ',
+        anchor='w'
+    ).pack(fill='x')
+
+    tk.Label(
+        detalhes,
+        text='Responsável: ',
+        anchor='w'
+    ).pack(fill='x')
+
+    tk.Label(
+        detalhes,
+        text='Setor: ',
+        anchor='w'
+    ).pack(fill='x')
+
+    tk.Label(
+        detalhes,
+        text='Tipo de ativo: ',
+        anchor='w'
+    ).pack(fill='x')
+
+    tk.Label(
+        detalhes,
+        text='Vulnerabilidades: ',
+        anchor='w'
+    ).pack(fill='x')
+
+    #visibilidade dos detalhes
+    detalhes_visi = False
+
+    def alternar():
+        nonlocal detalhes_visi
+
+        if detalhes_visi:
+            detalhes.pack_forget()
+        else:
+            detalhes.pack(
+                fill='x',
+                padx=10,
+                pady=5
+            )
+        detalhes_visi = not detalhes_visi
+    botao_item.config(command=alternar)
 
 botao = tk.Button(
     frame_controle,
