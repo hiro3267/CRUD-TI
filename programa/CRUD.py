@@ -193,42 +193,121 @@ def adicionar_item():
     # area de detalhes
     detalhes = tk.Frame(item_frame)
 
-    # informações extras
+    # -----------------informações extras-----------------
+
+    # Identificador único
+    frame_id = tk.Frame(detalhes)
+    frame_id.pack(fill='x', pady=2)
+
     tk.Label(
-        detalhes,
-        text='Identificador Único: ',
+        frame_id,
+        text='Identificador Único:',
+        width=18,
         anchor='w'
-    ).pack(fill='x')
+    ).pack(side='left')
+
+    tk.Label(
+        frame_id,
+        text=texto,
+        anchor='w'
+    ).pack(side='left')
+
+    # Hostname
+    frame_host = tk.Frame(detalhes)
+    frame_host.pack(fill='x', pady=2)
+
+    tk.Label(
+        frame_host,
+        text='Hostname:',
+        width=18,
+        anchor='w'
+    ).pack(side='left')
+
+    entry_host = tk.Entry(frame_host)
+
+    entry_host.insert(0, f'HOST-{texto}')
+
+    entry_host.pack(
+        side='left',
+        fill='x',
+        expand=True
+    )
+
+    # Responsável
+    frame_resp = tk.Frame(detalhes)
+    frame_resp.pack(fill='x', pady=2)
+
+    tk.Label(
+        frame_resp,
+        text='Responsável',
+        width=18,
+        anchor='w'
+    ).pack(side='left')
+
+    entry_resp = tk.Entry(frame_resp)
+
+    entry_resp.pack(
+        side='left',
+        fill='x',
+        expand=True
+    )
+
+    # Setor
+    frame_setor = tk.Frame(detalhes)
+    frame_setor.pack(fill='x', pady=2)
+
+    tk.Label(
+        frame_setor,
+        text='Setor:',
+        width=18,
+        anchor='w'
+    ).pack(side='left')
+
+    entry_setor = tk.Entry(frame_setor)
+
+    entry_setor.pack(
+        side='left',
+        fill='x',
+        expand=True
+    )
+    
+    # Tipo de Ativo
+    frame_ativo = tk.Frame(detalhes)
+    frame_ativo.pack(fill='x', pady=2)
 
     tk.Label(
         detalhes,
-        text='Hostname: ',
+        text='Tipo de ativo:',
+        width=18,
         anchor='w'
-    ).pack(fill='x')
+    ).pack(side='left')
+
+    entry_ativo = tk.Entry(frame_ativo)
+
+    entry_ativo.pack(
+        side='left',
+        fill='x',
+        expand=True
+    )
+
+    # Vulnerabilidades
+    frame_vul = tk.Frame(detalhes)
+    frame_vul.pack(fill='x', pady=2)
 
     tk.Label(
         detalhes,
-        text='Responsável: ',
+        text='Vulnerabilidades:',
+        width=18,
         anchor='w'
-    ).pack(fill='x')
+    ).pack(side='left')
 
-    tk.Label(
-        detalhes,
-        text='Setor: ',
-        anchor='w'
-    ).pack(fill='x')
+    entry_vul = tk.Entry(frame_vul)
 
-    tk.Label(
-        detalhes,
-        text='Tipo de ativo: ',
-        anchor='w'
-    ).pack(fill='x')
-
-    tk.Label(
-        detalhes,
-        text='Vulnerabilidades: ',
-        anchor='w'
-    ).pack(fill='x')
+    entry_vul.pack(
+        side='left',
+        fill='x',
+        expand=True
+    )
 
     #visibilidade dos detalhes
     detalhes_visi = False
