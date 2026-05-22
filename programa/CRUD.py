@@ -401,33 +401,29 @@ def adicionar_item():
                 text=f'● {numero}. {texto}',
                 fg='green'
             )
-
             return
 
-        abertas = False
+        estados = [vul['status'].get() for vul in vulnerabilidades_ativo]
 
-        for vul in vulnerabilidades_ativo:
+    # vermelho: risco
+        if any(s in ('Aberta', 'Em tratamento') for s in estados):
 
-            status = vul['status'].get()
+            cor = 'red'
 
-            if status != 'Aceita':
+    # amarelo: Aceita
+        elif any(s == 'Aceita' for s in estados):
 
-                abertas = True
-                break
+            cor = 'goldenrod'
 
-        if abertas:
-
-            botao_item.config(
-                text=f'● {numero}. {texto}',
-                fg='red'
-            )
-
+    # verde: corrigido
         else:
 
-            botao_item.config(
-                text=f'● {numero}. {texto}',
-                fg='goldenrod'
-            )
+            cor = 'green'
+
+        botao_item.config(
+            text=f'● {numero}. {texto}',
+            fg=cor
+        )
 
     # adicionar vulnerabilidade
     def adicionar_vul():
