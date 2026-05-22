@@ -1,25 +1,24 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+from tkinter import filedialog
+import json
 
-# =========================
+autosave_path = "ativos_backup.json"
+autosave_job = None
+
 # DADOS
-# =========================
 
 ativos = []
 ids_existentes = set()
 
-# =========================
 # JANELA
-# =========================
 
 janela = tk.Tk()
 janela.title("Ativos")
-janela.geometry("500x700")
+janela.geometry("600x700")
 
-# =========================
 # SCROLL
-# =========================
 
 container = tk.Frame(janela)
 container.pack(fill='both', expand=True, padx=10, pady=10)
@@ -97,9 +96,7 @@ canvas.bind_all('<MouseWheel>', rolar_mouse)
 canvas.bind_all('<Button-4>', rolar_mouse)
 canvas.bind_all('<Button-5>', rolar_mouse)
 
-# =========================
 # CATEGORIAS
-# =========================
 
 categorias = [
     'Notebook',
@@ -129,9 +126,7 @@ for categoria in categorias:
 
     frames_categorias[categoria] = frame
 
-# =========================
 # CONTROLE
-# =========================
 
 frame_controle = tk.Frame(janela)
 
@@ -189,9 +184,7 @@ menu = ttk.Combobox(
 
 menu.pack(side='left')
 
-# =========================
 # ADICIONAR ITEM
-# =========================
 
 def adicionar_item():
 
@@ -235,9 +228,7 @@ def adicionar_item():
         frames_categorias[categoria].pack_slaves()
     ) + 1
 
-    # =========================
     # FRAME ITEM
-    # =========================
 
     item_frame = tk.Frame(
         frames_categorias[categoria],
@@ -279,6 +270,8 @@ def adicionar_item():
         if not frames_categorias[categoria].winfo_children():
 
             frames_categorias[categoria].pack_forget()
+        
+        agendar_autosave()
 
     botao_excluir = tk.Button(
         topo_item,
@@ -292,9 +285,7 @@ def adicionar_item():
 
     botao_excluir.pack(side='right')
 
-    # =========================
     # DETALHES
-    # =========================
 
     detalhes = tk.Frame(item_frame)
 
@@ -370,9 +361,7 @@ def adicionar_item():
         text=categoria
     ).pack(side='left')
 
-    # =========================
     # VULNERABILIDADES
-    # =========================
 
     vulnerabilidades_ativo = []
 
@@ -464,13 +453,13 @@ def adicionar_item():
         # excluir vulnerabilidade
         def excluir_vul():
 
-            vulnerabilidades_ativo.remove(
-                vulnerabilidade
-            )
+            vulnerabilidades_ativo.append(vulnerabilidade)
 
             vul_frame.destroy()
 
             atualizar_indicador()
+
+            agendar_autosave()
 
         botao_excluir_vul = tk.Button(
             topo_vul,
@@ -589,21 +578,13 @@ def adicionar_item():
             expand=True
         )
 
-        # salvar vulnerabilidade
-        vulnerabilidade = {
-            'frame': vul_frame,
-            'status': combo_status
-        }
-
-        vulnerabilidades_ativo.append(
-            vulnerabilidade
-        )
-
         # atualizar indicador
         combo_status.bind(
             '<<ComboboxSelected>>',
-            lambda e: atualizar_indicador()
-        )
+            lambda e:(
+                 atualizar_indicador(),
+                 agendar_autosave()
+        ))
 
         # cor severidade
         def atualizar_cor(event=None):
@@ -628,7 +609,8 @@ def adicionar_item():
 
         combo_sev.bind(
             '<<ComboboxSelected>>',
-            atualizar_cor
+            atualizar_cor(),
+            lambda e: agendar_autosave()
         )
 
         # expandir/recolher
@@ -657,6 +639,16 @@ def adicionar_item():
         )
 
         atualizar_indicador()
+
+        # data vulnerabilidade
+        vulnerabilidade = {
+            "descricao": entry_desc,
+            "tipo": combo_tipo,
+            "severidade": combo_sev,
+            "status": combo_status
+        }
+
+        agendar_autosave()
 
     # botão adicionar vulnerabilidade
     botao_add_vul = tk.Button(
@@ -696,6 +688,20 @@ def adicionar_item():
         command=alternar
     )
 
+    #data ativos
+    ativo_data = {
+        "id": texto,
+        "categoria": categoria,
+        "hostname": entry_host,
+        "responsavel": entry_resp,
+        "setor": entry_setor,
+        "vulnerabilidades": vulnerabilidades_ativo
+    }
+
+    ativos.append(ativo_data)
+
+    agendar_autosave()
+
 # botão adicionar
 botao = tk.Button(
     frame_controle,
@@ -707,6 +713,95 @@ botao.pack(
     side='left',
     padx=(10, 0)
 )
+
+# salvar
+def salvar_json():
+
+    dados = []
+
+    for ativo in ativos:
+
+        dados_vul = []
+
+        for vul in ativo["vulnerabilidades"]:
+
+            dados_vul.append({
+                "descricao": vul["descricao"].get(),
+                "tipo": vul["tipo"].get(),
+                "severidade": vul["severidade"].get(),
+                "status": vul["status"].get()
+            })
+
+        dados.append({
+            "id": ativo["id"],
+            "categoria": ativo["categoria"],
+            "hostname": ativo["hostname"].get(),
+            "responsavel": ativo["responsavel"].get(),
+            "setor": ativo["setor"].get(),
+            "vulnerabilidades": dados_vul
+        })
+
+    caminho = filedialog.asksaveasfilename(
+        defaultextension=".json",
+        filetypes=[("JSON files", "*.json")]
+    )
+
+    if not caminho:
+        return
+
+    with open(caminho, "w", encoding="utf-8") as f:
+        json.dump(dados, f, indent=4, ensure_ascii=False)
+
+    messagebox.showinfo("Sucesso", "Arquivo salvo!")
+
+# botão de salvamento
+botao_salvar = tk.Button(
+    frame_controle,
+    text="Salvar JSON",
+    command=salvar_json
+)
+
+botao_salvar.pack(side='left', padx=10)
+
+# salvamento automático
+def salvar_auto():
+
+    dados = []
+
+    for ativo in ativos:
+
+        dados_vul = []
+
+        for vul in ativo["vulnerabilidades"]:
+
+            dados_vul.append({
+                "descricao": vul["descricao"].get(),
+                "tipo": vul["tipo"].get(),
+                "severidade": vul["severidade"].get(),
+                "status": vul["status"].get()
+            })
+
+        dados.append({
+            "id": ativo["id"],
+            "categoria": ativo["categoria"],
+            "hostname": ativo["hostname"].get(),
+            "responsavel": ativo["responsavel"].get(),
+            "setor": ativo["setor"].get(),
+            "vulnerabilidades": dados_vul
+        })
+
+    with open(autosave_path, "w", encoding="utf-8") as f:
+        json.dump(dados, f, indent=4, ensure_ascii=False)
+
+# debounce
+def agendar_autosave():
+
+    global autosave_job
+
+    if autosave_job is not None:
+        janela.after_cancel(autosave_job)
+
+    autosave_job = janela.after(2000, salvar_auto)
 
 # iniciar
 janela.mainloop()
