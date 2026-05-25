@@ -331,6 +331,36 @@ def adicionar_item():
         anchor='w'
     ).pack(side='left')
 
+    # --------------informações extras--------------
+
+    # identificador único
+    frame_id = tk.Frame(detalhes)
+    frame_id.pack(fill='x', pady=2)
+
+    tk.Label(
+        frame_id,
+        text='Identificador Único:',
+        width=18,
+        anchor='w'
+    ).pack(side='left')
+
+    tk.Label(
+        frame_id,
+        text=texto,
+        anchor='w'
+    ).pack(side='left')
+
+    # hostname
+    frame_host = tk.Frame(detalhes)
+    frame_host.pack(fill='x', pady=2)
+
+    tk.Label(
+        frame_host,
+        text='Hostname:',
+        width=18,
+        anchor='w',
+    ).pack(fill='x')
+
     tk.Label(
         frame_id,
         text=texto
