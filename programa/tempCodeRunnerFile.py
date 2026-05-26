@@ -580,6 +580,10 @@ def adicionar_item(event=None, carregando=False):
         pady=5
     )
 
+    lista_vul = tk.Frame(frame_vul)
+
+    lista_vul.pack(fill='x')
+
     #data ativos
     ativo_data = {
         "numero": numero,
@@ -630,10 +634,6 @@ def adicionar_item(event=None, carregando=False):
     # adicionar vulnerabilidade
     def adicionar_vul():
 
-        if not lista_vul.winfo_ismapped():
-
-            lista_vul.pack(fill='x')
-
         numero_vul = len(
             lista_vul.winfo_children()
         ) + 1
@@ -670,20 +670,19 @@ def adicionar_item(event=None, carregando=False):
         # excluir vulnerabilidade
         def excluir_vul():
 
-            if vulnerabilidade in vulnerabilidades_ativo:
-                vulnerabilidades_ativo.remove(vulnerabilidade)
+            vulnerabilidades_ativo.remove(vulnerabilidade)
 
             vul_frame.destroy()
-
-            janela.update_idletasks
 
             renumerar_vulnerabilidades()
 
             atualizar_indicador()
 
-            if not vulnerabilidades_ativo:
+            frame_principal.update_idletasks()
 
-                lista_vul.pack_forget()
+            canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
 
             agendar_autosave()
 
@@ -930,10 +929,6 @@ def adicionar_item(event=None, carregando=False):
         fill='x',
         pady=5
     )
-
-    lista_vul = tk.Frame(frame_vul)
-
-    lista_vul.pack(fill='x')
 
     # expandir detalhes ativo
     detalhes_visivel = False
