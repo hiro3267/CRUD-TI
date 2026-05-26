@@ -162,6 +162,7 @@ def filtrar_ativos(event=None):
     if termo == placeholder_busca:
         termo = ''
 
+    # mostrar/esconder ativos
     for ativo in ativos:
 
         identificador = ativo["id"].lower()
@@ -180,29 +181,25 @@ def filtrar_ativos(event=None):
         )
 
         if encontrou or termo == '':
+            if ativo["visivel"]:
+                if not ativo["frame"].winfo_ismapped():
 
-            if not ativo["frame"].winfo_ismapped():
-
-                ativo["frame"].pack(
-                    fill='x',
-                    pady=3
-                )
+                    ativo["frame"].pack(
+                        fill='x',
+                        pady=3
+                    )
 
         else:
 
             ativo["frame"].pack_forget()
 
-    # esconder categorias vazias
+    # mostrar/esconder categorias
     for categoria, frame_categoria in frames_categorias.items():
 
-        visiveis = False
-
-        for widget in frame_categoria.winfo_children():
-
-            if widget.winfo_ismapped():
-
-                visiveis = True
-                break
+        visiveis = any(
+            child.winfo_ismapped()
+            for child in frame_categoria.winfo_children()
+        )
 
         if visiveis:
 
@@ -218,19 +215,23 @@ def filtrar_ativos(event=None):
 
             frame_categoria.pack_forget()
 
-        for categoria in categorias:
-            ordenar_categoria(categoria)
+    # ordenar
+    for categoria in categorias:
+
+        ordenar_categoria(categoria)
+
+# debounce filtro
+filtro_job = None
 
 def agendar_filtro(event=None):
 
     global filtro_job
 
     if filtro_job is not None:
-
         janela.after_cancel(filtro_job)
 
     filtro_job = janela.after(
-        250,
+        300,
         filtrar_ativos
     )
 
@@ -349,12 +350,15 @@ def ordenar_categoria(categoria):
 
     for ativo in ativos_categoria:
 
-        ativo["frame"].pack_forget()
+        # só reorganiza se estiver visível
+        if ativo["frame"].winfo_ismapped():
 
-        ativo["frame"].pack(
-            fill='x',
-            pady=3
-        )
+            ativo["frame"].pack_forget()
+
+            ativo["frame"].pack(
+                fill='x',
+                pady=3
+            )
 
     renumerar_categoria(categoria)
 
@@ -600,7 +604,8 @@ def adicionar_item(event=None, carregando=False):
         "setor": entry_setor,
         "vulnerabilidades": vulnerabilidades_ativo,
         "frame": item_frame,
-        "botao": botao_item
+        "botao": botao_item,
+        "visivel": True
     }
 
     # atualizar indicador ativo
@@ -887,6 +892,8 @@ def adicionar_item(event=None, carregando=False):
 
         agendar_autosave()
 
+    ativo_data["adicionar_vul"] = adicionar_vul
+
     # renumerar vulnerabilidades
     def renumerar_vulnerabilidades():
 
@@ -1115,6 +1122,16 @@ def carregar_auto():
         ativo["hostname"].insert(0, item["hostname"])
         ativo["responsavel"].insert(0, item["responsavel"])
         ativo["setor"].insert(0, item["setor"])
+
+        # recriar vulnerabilidades
+        for vul in item["vulnerabilidades"]:
+
+            ativo["adicionar_vul"]()
+            nova_vul = ativo["vulnerabilidades"][-1]
+            nova_vul["descricao"].insert(0, vul["descricao"])
+            nova_vul["tipo"].set(vul["tipo"])
+            nova_vul["severidade"].set(vul["severidade"])
+            nova_vul["status"].set(vul["status"])
 
     janela.after(100, filtrar_ativos)
 

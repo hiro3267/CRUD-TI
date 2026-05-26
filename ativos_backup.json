@@ -2,37 +2,13 @@
     {
         "id": "7",
         "categoria": "Notebook",
-        "hostname": "",
+        "hostname": "goetia",
         "responsavel": "",
         "setor": "",
         "vulnerabilidades": []
     },
     {
         "id": "8",
-        "categoria": "Notebook",
-        "hostname": "",
-        "responsavel": "",
-        "setor": "",
-        "vulnerabilidades": []
-    },
-    {
-        "id": "9",
-        "categoria": "Notebook",
-        "hostname": "",
-        "responsavel": "",
-        "setor": "",
-        "vulnerabilidades": []
-    },
-    {
-        "id": "5",
-        "categoria": "Notebook",
-        "hostname": "",
-        "responsavel": "",
-        "setor": "",
-        "vulnerabilidades": []
-    },
-    {
-        "id": "6",
         "categoria": "Notebook",
         "hostname": "",
         "responsavel": "",
