@@ -138,7 +138,7 @@ frame_controle.pack(
 
 entrada = tk.Entry(
     frame_controle,
-    fg='grey'
+    fg='black'
 )
 
 entrada.pack(
@@ -183,7 +183,7 @@ def filtrar_ativos(event=None):
 
             if not ativo["frame"].winfo_ismapped():
 
-                ativo["frame"].pack_configure(
+                ativo["frame"].pack(
                     fill='x',
                     pady=3
                 )
@@ -344,23 +344,23 @@ def ordenar_categoria(categoria):
     ]
 
     ativos_categoria.sort(
-        key=lambda a: int(a["id"])
+        key=lambda a: a["numero"]
     )
 
     for ativo in ativos_categoria:
 
-        if ativo["frame"].winfo_ismapped():
+        ativo["frame"].pack_forget()
 
-            ativo["frame"].pack_forget()
+        ativo["frame"].pack(
+            fill='x',
+            pady=3
+        )
 
-            ativo["frame"].pack(
-                fill='x',
-                pady=3
-            )
+    renumerar_categoria(categoria)
 
 # ADICIONAR ITEM
 
-def adicionar_item():
+def adicionar_item(event=None, carregando=False):
 
     texto = entrada.get().strip()
 
@@ -883,6 +883,8 @@ def adicionar_item():
 
         vulnerabilidades_ativo.append(vulnerabilidade)
 
+        atualizar_cor()
+
         agendar_autosave()
 
     # renumerar vulnerabilidades
@@ -951,12 +953,20 @@ def adicionar_item():
 
     ativos.append(ativo_data)
 
-    janela.after(
-    10,
-    filtrar_ativos
-    )
+    if not carregando:
+
+        janela.after(
+            10,
+            filtrar_ativos
+        )
 
     agendar_autosave()
+
+    if not carregando:
+        entrada.delete(0, tk.END)
+        entrada.focus()
+
+        sair_entry(None)
 
 # botão adicionar
 botao = tk.Button(
@@ -1063,6 +1073,52 @@ def agendar_autosave():
         janela.after_cancel(autosave_job)
 
     autosave_job = janela.after(2000, salvar_auto)
+
+# carregar json
+def carregar_auto():
+
+    try:
+
+        with open(autosave_path, "r", encoding="utf-8") as f:
+
+            dados = json.load(f)
+
+    except FileNotFoundError:
+
+        return
+
+    except json.JSONDecodeError:
+
+        messagebox.showwarning(
+            "Erro",
+            "Arquivo de backup corrompido."
+        )
+
+        return
+
+    for item in dados:
+
+        # preencher entrada
+        entrada.delete(0, tk.END)
+        entrada.insert(0, item["id"])
+
+        # selecionar categoria
+        categoria_var.set(item["categoria"])
+
+        # criar ativo
+        adicionar_item(carregando=True)
+
+        # pegar último ativo criado
+        ativo = ativos[-1]
+
+        # preencher campos
+        ativo["hostname"].insert(0, item["hostname"])
+        ativo["responsavel"].insert(0, item["responsavel"])
+        ativo["setor"].insert(0, item["setor"])
+
+    janela.after(100, filtrar_ativos)
+
+carregar_auto()
 
 # iniciar
 janela.mainloop()
