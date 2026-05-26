@@ -970,6 +970,11 @@ botao.pack(
     padx=(10, 0)
 )
 
+entrada.bind(
+    '<Return>',
+    lambda event: adicionar_item()
+)
+
 # salvar
 def salvar_json():
 
