@@ -152,7 +152,128 @@ placeholder = 'identificador único'
 
 entrada.insert(0, placeholder)
 
-# placeholder
+# filtro
+filtro_job = None
+
+def filtrar_ativos(event=None):
+
+    termo = entrada_busca.get().lower().strip()
+
+    if termo == placeholder_busca:
+        termo = ''
+
+    for ativo in ativos:
+
+        identificador = ativo["id"].lower()
+
+        hostname = ativo["hostname"].get().lower()
+
+        responsavel = ativo["responsavel"].get().lower()
+
+        setor = ativo["setor"].get().lower()
+
+        encontrou = (
+            termo in identificador
+            or termo in hostname
+            or termo in responsavel
+            or termo in setor
+        )
+
+        if encontrou or termo == '':
+
+            if not ativo["frame"].winfo_ismapped():
+
+                ativo["frame"].pack_configure(
+                    fill='x',
+                    pady=3
+                )
+
+        else:
+
+            ativo["frame"].pack_forget()
+
+    # esconder categorias vazias
+    for categoria, frame_categoria in frames_categorias.items():
+
+        visiveis = False
+
+        for widget in frame_categoria.winfo_children():
+
+            if widget.winfo_ismapped():
+
+                visiveis = True
+                break
+
+        if visiveis:
+
+            if not frame_categoria.winfo_ismapped():
+
+                frame_categoria.pack(
+                    fill='x',
+                    padx=10,
+                    pady=5
+                )
+
+        else:
+
+            frame_categoria.pack_forget()
+
+def agendar_filtro(event=None):
+
+    global filtro_job
+
+    if filtro_job is not None:
+
+        janela.after_cancel(filtro_job)
+
+    filtro_job = janela.after(
+        250,
+        filtrar_ativos
+    )
+
+# busca
+
+frame_busca = tk.Frame(janela)
+
+frame_busca.pack(
+    fill='x',
+    padx=10,
+    pady=(0, 10)
+)
+
+entrada_busca = tk.Entry(
+    frame_busca,
+    fg='grey'
+)
+
+entrada_busca.pack(
+    fill='x',
+    expand=True
+)
+
+placeholder_busca = 'buscar ativo...'
+
+entrada_busca.insert(0, placeholder_busca)
+
+# placeholder de busca
+def entrar_busca(event):
+    if entrada_busca.get() == placeholder_busca:
+        entrada_busca.delete(0, tk.END)
+        entrada_busca.config(fg='black')
+        entrada_busca.icursor(tk.END)
+
+def sair_busca(event):
+    if entrada_busca.get() == '':
+        entrada_busca.insert(0, placeholder_busca)
+        entrada_busca.config(fg='grey')
+        filtrar_ativos()
+
+entrada_busca.bind('<FocusIn>', entrar_busca)
+entrada_busca.bind('<FocusOut>', sair_busca)
+
+entrada_busca.bind('<KeyRelease>', agendar_filtro)
+
+# placeholder da entrada
 def entrar_entry(event):
 
     if entrada.get() == placeholder:
@@ -183,6 +304,33 @@ menu = ttk.Combobox(
 )
 
 menu.pack(side='left')
+
+# NUMERAÇÃO
+def renumerar_categoria(categoria):
+
+    contador = 1
+
+    for child in frames_categorias[categoria].winfo_children():
+
+        if isinstance(child, tk.Frame):
+
+            for ativo in ativos:
+
+                if ativo["frame"] == child:
+
+                    ativo["numero"] = contador
+
+                    texto_id = ativo["id"]
+
+                    cor_atual = ativo["botao"].cget('fg')
+
+                    ativo["botao"].config(
+                        text=f'● {contador}. {texto_id}',
+                        fg=cor_atual
+                    )
+
+                    contador += 1
+                    break
 
 # ADICIONAR ITEM
 
@@ -224,8 +372,10 @@ def adicionar_item():
             pady=5
         )
 
-    numero = len(
-        frames_categorias[categoria].pack_slaves()
+    numero = sum(
+        1
+        for child in frames_categorias[categoria].winfo_children()
+        if isinstance(child, tk.Frame)
     ) + 1
 
     # FRAME ITEM
@@ -265,9 +415,20 @@ def adicionar_item():
 
         ids_existentes.remove(texto)
 
+        ativos.remove(ativo_data)
+
         item_frame.destroy()
 
-        if not frames_categorias[categoria].winfo_children():
+        renumerar_categoria(categoria)
+
+        filtrar_ativos()
+
+        possui_visiveis = any(
+            child.winfo_ismapped()
+            for child in frames_categorias[categoria].winfo_children()
+        )
+
+        if not possui_visiveis:
 
             frames_categorias[categoria].pack_forget()
         
@@ -314,6 +475,14 @@ def adicionar_item():
             expand=True
         )
 
+        entry.bind(
+            '<KeyRelease>',
+            lambda e: (
+                agendar_autosave(),
+                agendar_filtro()
+            )
+        )
+
         return entry
 
     # ID
@@ -348,22 +517,6 @@ def adicionar_item():
         frame_id,
         text=texto,
         anchor='w'
-    ).pack(side='left')
-
-    # hostname
-    frame_host = tk.Frame(detalhes)
-    frame_host.pack(fill='x', pady=2)
-
-    tk.Label(
-        frame_host,
-        text='Hostname:',
-        width=18,
-        anchor='w',
-    ).pack(fill='x')
-
-    tk.Label(
-        frame_id,
-        text=texto
     ).pack(side='left')
 
     # campos
@@ -411,13 +564,26 @@ def adicionar_item():
 
     lista_vul.pack(fill='x')
 
+    #data ativos
+    ativo_data = {
+        "numero": numero,
+        "id": texto,
+        "categoria": categoria,
+        "hostname": entry_host,
+        "responsavel": entry_resp,
+        "setor": entry_setor,
+        "vulnerabilidades": vulnerabilidades_ativo,
+        "frame": item_frame,
+        "botao": botao_item
+    }
+
     # atualizar indicador ativo
     def atualizar_indicador():
 
         if not vulnerabilidades_ativo:
 
             botao_item.config(
-                text=f'● {numero}. {texto}',
+                text=f'● {ativo_data["numero"]}. {texto}',
                 fg='green'
             )
             return
@@ -440,7 +606,7 @@ def adicionar_item():
             cor = 'green'
 
         botao_item.config(
-            text=f'● {numero}. {texto}',
+            text=f'● {ativo_data["numero"]}. {texto}',
             fg=cor
         )
 
@@ -483,9 +649,11 @@ def adicionar_item():
         # excluir vulnerabilidade
         def excluir_vul():
 
-            vulnerabilidades_ativo.append(vulnerabilidade)
+            vulnerabilidades_ativo.remove(vulnerabilidade)
 
             vul_frame.destroy()
+
+            renumerar_vulnerabilidades()
 
             atualizar_indicador()
 
@@ -609,12 +777,16 @@ def adicionar_item():
         )
 
         # atualizar indicador
+        def ao_mudar_status(event=None):
+
+            atualizar_indicador()
+
+            agendar_autosave()
+
         combo_status.bind(
             '<<ComboboxSelected>>',
-            lambda e:(
-                 atualizar_indicador(),
-                 agendar_autosave()
-        ))
+            ao_mudar_status
+        )
 
         # cor severidade
         def atualizar_cor(event=None):
@@ -625,7 +797,7 @@ def adicionar_item():
                 'Baixa': 'green',
                 'Média': 'orange',
                 'Alta': 'red',
-                'Crítica': 'black'
+                'Crítica': 'purple'
             }
 
             cor = cores.get(
@@ -637,10 +809,15 @@ def adicionar_item():
                 fg=cor
             )
 
+        def ao_mudar_severidade(event=None):
+
+            atualizar_cor()
+
+            agendar_autosave()
+
         combo_sev.bind(
             '<<ComboboxSelected>>',
-            atualizar_cor(),
-            lambda e: agendar_autosave()
+            ao_mudar_severidade
         )
 
         # expandir/recolher
@@ -678,7 +855,35 @@ def adicionar_item():
             "status": combo_status
         }
 
+        vulnerabilidades_ativo.append(vulnerabilidade)
+
         agendar_autosave()
+
+    # renumerar vulnerabilidades
+    def renumerar_vulnerabilidades():
+
+        contador = 1
+
+        for child in lista_vul.winfo_children():
+
+            for widget in child.winfo_children():
+
+                if isinstance(widget, tk.Frame):
+
+                    for botao in widget.winfo_children():
+
+                        if isinstance(botao, tk.Button):
+
+                            texto = botao.cget("text")
+
+                            if texto.startswith("Vulnerabilidade"):
+
+                                botao.config(
+                                 text=f"Vulnerabilidade {contador}"
+                                )
+
+                                contador += 1
+                                break
 
     # botão adicionar vulnerabilidade
     botao_add_vul = tk.Button(
@@ -718,17 +923,12 @@ def adicionar_item():
         command=alternar
     )
 
-    #data ativos
-    ativo_data = {
-        "id": texto,
-        "categoria": categoria,
-        "hostname": entry_host,
-        "responsavel": entry_resp,
-        "setor": entry_setor,
-        "vulnerabilidades": vulnerabilidades_ativo
-    }
-
     ativos.append(ativo_data)
+
+    janela.after(
+    10,
+    filtrar_ativos
+    )
 
     agendar_autosave()
 
