@@ -138,7 +138,7 @@ frame_controle.pack(
 
 entrada = tk.Entry(
     frame_controle,
-    fg='black'
+    fg='grey'
 )
 
 entrada.pack(
@@ -162,46 +162,51 @@ def filtrar_ativos(event=None):
     if termo == placeholder_busca:
         termo = ''
 
-    # mostrar/esconder ativos
-    for ativo in ativos:
+    for categoria in categorias:
 
-        identificador = ativo["id"].lower()
+        frame_categoria = frames_categorias[categoria]
 
-        hostname = ativo["hostname"].get().lower()
+        possui_visiveis = False
 
-        responsavel = ativo["responsavel"].get().lower()
+        ativos_categoria = [
+            ativo for ativo in ativos
+            if ativo["categoria"] == categoria
+            and ativo["frame"].winfo_exists()
+        ]
 
-        setor = ativo["setor"].get().lower()
-
-        encontrou = (
-            termo in identificador
-            or termo in hostname
-            or termo in responsavel
-            or termo in setor
+        ativos_categoria.sort(
+            key=lambda a: a["numero"]
         )
 
-        if encontrou or termo == '':
-            if ativo["visivel"]:
-                if not ativo["frame"].winfo_ismapped():
+        for ativo in ativos_categoria:
 
-                    ativo["frame"].pack(
-                        fill='x',
-                        pady=3
-                    )
+            identificador = ativo["id"].lower()
 
-        else:
+            hostname = ativo["hostname"].get().lower()
+
+            responsavel = ativo["responsavel"].get().lower()
+
+            setor = ativo["setor"].get().lower()
+
+            encontrou = (
+                termo in identificador
+                or termo in hostname
+                or termo in responsavel
+                or termo in setor
+            )
 
             ativo["frame"].pack_forget()
 
-    # mostrar/esconder categorias
-    for categoria, frame_categoria in frames_categorias.items():
+            if encontrou or termo == '':
 
-        visiveis = any(
-            child.winfo_ismapped()
-            for child in frame_categoria.winfo_children()
-        )
+                ativo["frame"].pack(
+                    fill='x',
+                    pady=3
+                )
 
-        if visiveis:
+                possui_visiveis = True
+
+        if possui_visiveis:
 
             if not frame_categoria.winfo_ismapped():
 
@@ -214,11 +219,6 @@ def filtrar_ativos(event=None):
         else:
 
             frame_categoria.pack_forget()
-
-    # ordenar
-    for categoria in categorias:
-
-        ordenar_categoria(categoria)
 
 # debounce filtro
 filtro_job = None
@@ -283,7 +283,8 @@ def entrar_entry(event):
     if entrada.get() == placeholder:
 
         entrada.delete(0, tk.END)
-        entrada.config(fg='black')
+
+    entrada.config(fg='black')
 
 def sair_entry(event):
 
@@ -342,6 +343,7 @@ def ordenar_categoria(categoria):
     ativos_categoria = [
         ativo for ativo in ativos
         if ativo["categoria"] == categoria
+        and ativo["frame"].winfo_exists()
     ]
 
     ativos_categoria.sort(
@@ -350,15 +352,12 @@ def ordenar_categoria(categoria):
 
     for ativo in ativos_categoria:
 
-        # só reorganiza se estiver visível
-        if ativo["frame"].winfo_ismapped():
+        ativo["frame"].pack_forget()
 
-            ativo["frame"].pack_forget()
-
-            ativo["frame"].pack(
-                fill='x',
-                pady=3
-            )
+        ativo["frame"].pack(
+            fill='x',
+            pady=3
+        )
 
     renumerar_categoria(categoria)
 
@@ -439,13 +438,13 @@ def adicionar_item(event=None, carregando=False):
         fill='x',
         expand=True
     )
-
     # excluir item
     def excluir_item():
 
         ids_existentes.remove(texto)
 
-        ativos.remove(ativo_data)
+        if ativo_data in ativos:
+            ativos.remove(ativo_data)
 
         item_frame.destroy()
 
@@ -453,15 +452,6 @@ def adicionar_item(event=None, carregando=False):
 
         filtrar_ativos()
 
-        possui_visiveis = any(
-            child.winfo_ismapped()
-            for child in frames_categorias[categoria].winfo_children()
-        )
-
-        if not possui_visiveis:
-
-            frames_categorias[categoria].pack_forget()
-        
         agendar_autosave()
 
     botao_excluir = tk.Button(
@@ -888,11 +878,12 @@ def adicionar_item(event=None, carregando=False):
 
         vulnerabilidades_ativo.append(vulnerabilidade)
 
+        vulnerabilidade["atualizar_cor"] = atualizar_cor
+        vulnerabilidade["atualizar_indicador"] = atualizar_indicador
+
         atualizar_cor()
 
         agendar_autosave()
-
-    ativo_data["adicionar_vul"] = adicionar_vul
 
     # renumerar vulnerabilidades
     def renumerar_vulnerabilidades():
@@ -901,24 +892,22 @@ def adicionar_item(event=None, carregando=False):
 
         for child in lista_vul.winfo_children():
 
-            for widget in child.winfo_children():
+            topo = child.winfo_children()[0]
 
-                if isinstance(widget, tk.Frame):
+            for widget in topo.winfo_children():
 
-                    for botao in widget.winfo_children():
+                if isinstance(widget, tk.Button):
 
-                        if isinstance(botao, tk.Button):
+                    texto = widget.cget("text")
 
-                            texto = botao.cget("text")
+                    if texto.startswith("Vulnerabilidade"):
 
-                            if texto.startswith("Vulnerabilidade"):
+                        widget.config(
+                            text=f"Vulnerabilidade {contador}"
+                        )
 
-                                botao.config(
-                                 text=f"Vulnerabilidade {contador}"
-                                )
-
-                                contador += 1
-                                break
+                        contador += 1
+                        break
 
     # botão adicionar vulnerabilidade
     botao_add_vul = tk.Button(
@@ -927,6 +916,8 @@ def adicionar_item(event=None, carregando=False):
         cursor='hand2',
         command=adicionar_vul
     )
+
+    ativo_data["adicionar_vul"] = adicionar_vul
 
     botao_add_vul.pack(
         fill='x',
@@ -970,10 +961,10 @@ def adicionar_item(event=None, carregando=False):
     agendar_autosave()
 
     if not carregando:
-        entrada.delete(0, tk.END)
-        entrada.focus()
 
-        sair_entry(None)
+        entrada.delete(0, tk.END)
+        entrada.config(fg='black')
+        entrada.focus_set()
 
 # botão adicionar
 botao = tk.Button(
@@ -1132,6 +1123,9 @@ def carregar_auto():
             nova_vul["tipo"].set(vul["tipo"])
             nova_vul["severidade"].set(vul["severidade"])
             nova_vul["status"].set(vul["status"])
+
+            nova_vul["atualizar_cor"]()
+            nova_vul["atualizar_indicador"]()
 
     janela.after(100, filtrar_ativos)
 
