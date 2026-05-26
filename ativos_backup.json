@@ -6,5 +6,13 @@
         "responsavel": "",
         "setor": "",
         "vulnerabilidades": []
+    },
+    {
+        "id": "8",
+        "categoria": "Notebook",
+        "hostname": "",
+        "responsavel": "",
+        "setor": "",
+        "vulnerabilidades": []
     }
 ]

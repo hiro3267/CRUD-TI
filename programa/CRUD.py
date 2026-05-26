@@ -218,6 +218,9 @@ def filtrar_ativos(event=None):
 
             frame_categoria.pack_forget()
 
+        for categoria in categorias:
+            ordenar_categoria(categoria)
+
 def agendar_filtro(event=None):
 
     global filtro_job
@@ -331,6 +334,29 @@ def renumerar_categoria(categoria):
 
                     contador += 1
                     break
+
+# Ordenação Numérica
+def ordenar_categoria(categoria):
+
+    ativos_categoria = [
+        ativo for ativo in ativos
+        if ativo["categoria"] == categoria
+    ]
+
+    ativos_categoria.sort(
+        key=lambda a: int(a["id"])
+    )
+
+    for ativo in ativos_categoria:
+
+        if ativo["frame"].winfo_ismapped():
+
+            ativo["frame"].pack_forget()
+
+            ativo["frame"].pack(
+                fill='x',
+                pady=3
+            )
 
 # ADICIONAR ITEM
 
