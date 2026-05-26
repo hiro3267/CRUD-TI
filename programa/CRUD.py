@@ -672,11 +672,17 @@ def adicionar_item(event=None, carregando=False):
 
             vulnerabilidades_ativo.remove(vulnerabilidade)
 
+            detalhes_vul.pack_forget()
+
+            vul_frame.pack_forget()
+
             vul_frame.destroy()
 
             renumerar_vulnerabilidades()
 
             atualizar_indicador()
+
+            lista_vul.update_idletasks()
 
             agendar_autosave()
 
