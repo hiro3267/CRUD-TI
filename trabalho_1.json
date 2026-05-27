@@ -1,1 +1,25 @@
-[]
+[
+    {
+        "id": "1",
+        "categoria": "Notebook",
+        "hostname": "",
+        "responsavel": "",
+        "setor": "",
+        "vulnerabilidades": []
+    },
+    {
+        "id": "2",
+        "categoria": "Notebook",
+        "hostname": "a",
+        "responsavel": "b",
+        "setor": "c",
+        "vulnerabilidades": [
+            {
+                "descricao": "a",
+                "tipo": "Software",
+                "severidade": "Média",
+                "status": "Aberta"
+            }
+        ]
+    }
+]

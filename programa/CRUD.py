@@ -16,7 +16,7 @@ ids_existentes = set()
 
 janela = tk.Tk()
 janela.title("Ativos")
-janela.geometry("600x700")
+janela.geometry("800x700")
 
 # SCROLL
 
@@ -1139,6 +1139,81 @@ def carregar_auto():
             nova_vul["atualizar_indicador"]()
 
     janela.after(100, filtrar_ativos)
+
+# Abrir JSON salvo
+def abrir_json():
+
+    caminho = filedialog.askopenfilename(
+        filetypes=[("JSON files", "*.json")]
+    )
+
+    if not caminho:
+        return
+
+    try:
+
+        with open(caminho, "r", encoding="utf-8") as f:
+
+            dados = json.load(f)
+
+    except json.JSONDecodeError:
+
+        messagebox.showwarning(
+            "Erro",
+            "Arquivo JSON inválido."
+        )
+
+        return
+
+    # limpar ativos atuais
+    for ativo in ativos[:]:
+
+        ativo["frame"].destroy()
+
+        ativos.remove(ativo)
+
+    ids_existentes.clear()
+
+    # recriar ativos
+    for item in dados:
+
+        entrada.delete(0, tk.END)
+        entrada.insert(0, item["id"])
+
+        categoria_var.set(item["categoria"])
+
+        adicionar_item(carregando=True)
+
+        ativo = ativos[-1]
+
+        ativo["hostname"].insert(0, item["hostname"])
+        ativo["responsavel"].insert(0, item["responsavel"])
+        ativo["setor"].insert(0, item["setor"])
+
+        for vul in item["vulnerabilidades"]:
+
+            ativo["adicionar_vul"]()
+
+            nova_vul = ativo["vulnerabilidades"][-1]
+
+            nova_vul["descricao"].insert(0, vul["descricao"])
+            nova_vul["tipo"].set(vul["tipo"])
+            nova_vul["severidade"].set(vul["severidade"])
+            nova_vul["status"].set(vul["status"])
+
+            nova_vul["atualizar_cor"]()
+            nova_vul["atualizar_indicador"]()
+
+    filtrar_ativos()
+
+# Botão abrir JSON
+botao_abrir = tk.Button(
+    frame_controle,
+    text="Abrir JSON",
+    command=abrir_json
+)
+
+botao_abrir.pack(side='left')
 
 carregar_auto()
 
