@@ -26,7 +26,7 @@ class App(tk.Tk):
 
     def criar_frame_controle(self):
         
-        self.frame_controle = tk.Frame(self)
+        self.frame_controle = ttk.Frame(self)
 
         self.frame_controle.pack(
             fill="x",
@@ -71,7 +71,7 @@ class App(tk.Tk):
     def criar_frame_busca(self):
         
 
-        self.frame_busca = tk.Frame(self)
+        self.frame_busca = ttk.Frame(self)
 
         self.frame_busca.pack(
             fill="x",
