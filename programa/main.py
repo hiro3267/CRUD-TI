@@ -1,5 +1,8 @@
 from interface.app import App
 
-app = App()
+def main():
+    app = App()
+    app.mainloop()
 
-app.mainloop()
+if __name__ == "__main__":
+    main()
