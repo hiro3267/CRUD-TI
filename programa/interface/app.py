@@ -69,7 +69,22 @@ class App(tk.Tk):
         )
 
     def criar_frame_busca(self):
-        pass
+        
+
+        self.frame_busca = tk.Frame(self)
+
+        self.frame_busca.pack(
+            fill="x",
+            padx=10,
+            pady=(0, 10)
+        )
+
+        self.entry_busca = ttk.Entry(self.frame_busca)
+
+        self.entry_busca.pack(
+            fill="x",
+            expand=True
+        )
 
     def criar_scroll(self):
 
@@ -83,4 +98,20 @@ class App(tk.Tk):
         )
 
     def criar_categorias(self):
-        pass
+        
+        self.frames_categorias = {}
+
+        for categoria in CATEGORIAS:
+
+            frame = ttk.LabelFrame(
+                self.scroll.content,
+                text=categoria
+            )
+
+            frame.pack(
+                fill="x",
+                padx=10,
+                pady=5
+            )
+
+            self.frames_categorias[categoria] = frame
