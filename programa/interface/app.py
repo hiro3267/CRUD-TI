@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 from interface.scrollbar import ScrollbarFrame
 from interface.ativo_frame import AtivoFrame
@@ -90,6 +90,11 @@ class App(tk.Tk):
             expand=True
         )
 
+        self.entry_busca.bind(
+            "<KeyRelease>",
+            self.filtrar_ativos
+        )
+
     def criar_scroll(self):
 
         self.scroll = ScrollbarFrame(self)
@@ -125,6 +130,22 @@ class App(tk.Tk):
         identificador = self.entry_id.get().strip()
         categoria = self.categoria_var.get()
 
+        if identificador =="":
+            messagebox.showwarning(
+                "Inválido",
+                "Informe um identificador para o ativo."
+            )
+            return
+        
+        chave = (categoria, identificador)
+
+        if chave in self.ids_existentes:
+            messagebox.showwarning(
+                "Inválido",
+                f"Já existe um ativo com o ID '{identificador}' na categoria '{categoria}'."
+            )
+            return
+
         ativo = Ativo(
             identificador=identificador,
             categoria=categoria
@@ -142,7 +163,8 @@ class App(tk.Tk):
             pady=5
         )
 
-        self.frames_ativos[ativo.identificador] = frame
+        self.ids_existentes.add(chave)
+        self.frames_ativos[chave] = frame
 
         self.ativos.append(ativo)
 
@@ -153,8 +175,43 @@ class App(tk.Tk):
         if ativo in self.ativos:
             self.ativos.remove(ativo)
 
-        self.ids_existentes.discard(ativo.identificador)
-
-        frame = self.frames_ativos.pop(ativo.identificador)
+        chave = (ativo.categoria, ativo.identificador)
+        self.ids_existentes.discard(chave)
+        frame = self.frames_ativos.pop(chave)
 
         frame.destroy()
+
+    def filtrar_ativos(self, event=None):
+
+        termo = self.entry_busca.get().strip().lower()
+
+        for ativo in self.ativos:
+
+            chave = (ativo.categoria, ativo.identificador)
+            frame = self.frames_ativos[chave]
+
+            campos = [
+                ativo.identificador,
+                ativo.hostname,
+                ativo.responsavel,
+                ativo.setor
+            ]
+
+            encontrado = any(
+                termo in campo.lower()
+                for campo in campos
+            )
+
+        if encontrado:
+
+            if not frame.winfo_ismapped():
+
+                frame.pack(
+                    fill="x",
+                    padx=5,
+                    pady=5
+                )
+
+        else:
+
+            frame.pack_forget()
