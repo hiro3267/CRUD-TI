@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 
 from interface.scrollbar import ScrollbarFrame
+from interface.ativo_frame import AtivoFrame
+from models.ativo import Ativo
 from utils.constantes import CATEGORIAS
 
 class App(tk.Tk):
@@ -15,6 +17,7 @@ class App(tk.Tk):
         self.ativos = []
         self.ids_existentes = set()
         self.frames_categorias = {}
+        self.frames_ativos = {}
 
         self.criar_interface()
 
@@ -60,7 +63,8 @@ class App(tk.Tk):
 
         self.botao_adicionar = ttk.Button(
             self.frame_controle,
-            text="Adicionar"
+            text="Adicionar",
+            command=self.adicionar_ativo
         )
 
         self.botao_adicionar.pack(
@@ -115,3 +119,44 @@ class App(tk.Tk):
             )
 
             self.frames_categorias[categoria] = frame
+
+    def adicionar_ativo(self):
+
+        identificador = self.entry_id.get().strip()
+        categoria = self.categoria_var.get()
+
+        ativo = Ativo(
+            identificador=identificador,
+            categoria=categoria
+        )
+
+        frame = AtivoFrame(
+            parent=self.frames_categorias[categoria],
+            ativo=ativo,
+            on_remover=self.remover_ativo
+        )
+
+        frame.pack(
+            fill="x",
+            padx=5,
+            pady=5
+        )
+
+        self.frames_ativos[ativo] = frame
+
+        self.ativos.append(ativo)
+
+        self.entry_id.delete(0, tk.END)
+
+        ativo.frame = frame
+
+    def remover_ativo(self, ativo):
+
+        if ativo in self.ativos:
+            self.ativos.remove(ativo)
+
+        self.ids_existentes.discard(ativo.identificador)
+
+        frame = self.frames_ativos.pop(ativo)
+
+        frame.destroy()

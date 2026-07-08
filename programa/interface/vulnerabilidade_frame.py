@@ -185,3 +185,15 @@ class VulnerabilidadeFrame(ttk.Frame):
             pady=5,
             stick="ew"
         )
+
+    def criar_botoes(self):
+
+        self.botao_excluir = ttk.Button(
+            self.frame_botoes,
+            text="Excluir Vulnerabilidade"
+        )
+
+        self.botao_excluir.pack(
+            side="right",
+            padx=5
+        )
