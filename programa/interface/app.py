@@ -202,16 +202,16 @@ class App(tk.Tk):
                 for campo in campos
             )
 
-        if encontrado:
+            if encontrado:
 
-            if not frame.winfo_ismapped():
+                if not frame.winfo_ismapped():
 
-                frame.pack(
+                    frame.pack(
                     fill="x",
                     padx=5,
                     pady=5
                 )
 
-        else:
+            else:
 
-            frame.pack_forget()
+                frame.pack_forget()
