@@ -142,13 +142,11 @@ class App(tk.Tk):
             pady=5
         )
 
-        self.frames_ativos[ativo] = frame
+        self.frames_ativos[ativo.identificador] = frame
 
         self.ativos.append(ativo)
 
         self.entry_id.delete(0, tk.END)
-
-        ativo.frame = frame
 
     def remover_ativo(self, ativo):
 
@@ -157,6 +155,6 @@ class App(tk.Tk):
 
         self.ids_existentes.discard(ativo.identificador)
 
-        frame = self.frames_ativos.pop(ativo)
+        frame = self.frames_ativos.pop(ativo.identificador)
 
         frame.destroy()

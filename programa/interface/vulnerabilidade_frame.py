@@ -5,10 +5,11 @@ from utils.constantes import (TIPOS_VULNERABILIDADE, SEVERIDADES, STATUS_VULNERA
 
 class VulnerabilidadeFrame(ttk.Frame):
 
-    def __init__(self, parent, vulnerabilidade: Vulnerabilidade):
+    def __init__(self, parent, vulnerabilidade: Vulnerabilidade, on_remover):
         super().__init__(parent)
 
         self.vulnerabilidade = vulnerabilidade
+        self.on_remover = on_remover
 
         self.container = ttk.LabelFrame(
             self,
@@ -69,7 +70,7 @@ class VulnerabilidadeFrame(ttk.Frame):
             column=0,
             padx=5,
             pady=5,
-            stick="ew"
+            sticky="ew"
         )
 
         self.entry_descricao = ttk.Entry(self.frame_campos)
@@ -79,7 +80,12 @@ class VulnerabilidadeFrame(ttk.Frame):
             column=1,
             padx=5,
             pady=5,
-            stick="ew"
+            sticky="ew"
+        )
+
+        self.entry_descricao.bind(
+            "<KeyRelease>",
+            self.atualizar_descricao
         )
 
         self.frame_campos.columnconfigure(1, weight=1)
@@ -96,10 +102,10 @@ class VulnerabilidadeFrame(ttk.Frame):
             column=0,
             padx=5,
             pady=5,
-            stick="w"
+            sticky="w"
         )
 
-        self.tipo_var = ttk.StringVar(
+        self.tipo_var = tk.StringVar(
             value=TIPOS_VULNERABILIDADE[0]
         )
 
@@ -115,8 +121,15 @@ class VulnerabilidadeFrame(ttk.Frame):
             column=1,
             padx=5,
             pady=5,
-            stick="ew"
+            sticky="ew"
         )
+
+        self.tipo_var.trace_add(
+            "write",
+            self.atualizar_tipo
+        )
+
+        self.atualizar_tipo()
 
     def criar_campo_severidade(self):
 
@@ -130,10 +143,10 @@ class VulnerabilidadeFrame(ttk.Frame):
             column=0,
             padx=5,
             pady=5,
-            stick="w"
+            sticky="w"
         )
 
-        self.severidade_var = ttk.StringVar(
+        self.severidade_var = tk.StringVar(
             value=SEVERIDADES[0]
         )
 
@@ -149,8 +162,15 @@ class VulnerabilidadeFrame(ttk.Frame):
             column=1,
             padx=5,
             pady=5,
-            stick="ew"
+            sticky="ew"
         )
+
+        self.severidade_var.trace_add(
+            "write",
+            self.atualizar_severidade
+        )
+
+        self.atualizar_severidade()
 
     def criar_campo_status(self):
 
@@ -164,10 +184,10 @@ class VulnerabilidadeFrame(ttk.Frame):
             column=0,
             padx=5,
             pady=5,
-            stick="w"
+            sticky="w"
         )
 
-        self.status_var = ttk.StringVar(
+        self.status_var = tk.StringVar(
             value=STATUS_VULNERABILIDADES[0]
         )
 
@@ -183,17 +203,45 @@ class VulnerabilidadeFrame(ttk.Frame):
             column=1,
             padx=5,
             pady=5,
-            stick="ew"
+            sticky="ew"
         )
+
+        self.status_var.trace_add(
+            "write",
+            self.atualizar_status
+        )
+
+        self.atualizar_status()
 
     def criar_botoes(self):
 
         self.botao_excluir = ttk.Button(
             self.frame_botoes,
-            text="Excluir Vulnerabilidade"
+            text="Excluir Vulnerabilidade",
+            command=self.excluir
         )
 
         self.botao_excluir.pack(
             side="right",
             padx=5
         )
+
+    def excluir(self):
+
+        self.on_remover(self.vulnerabilidade)
+
+    def atualizar_descricao(self, event=None):
+
+        self.vulnerabilidade.descricao = self.entry_descricao.get()
+
+    def atualizar_tipo(self, *args):
+
+        self.vulnerabilidade.tipo = self.tipo_var.get()
+
+    def atualizar_severidade(self, *args):
+
+        self.vulnerabilidade.severidade = self.severidade_var.get()
+
+    def atualizar_status(self, *args):
+
+        self.vulnerabilidade.status = self.status_var.get()

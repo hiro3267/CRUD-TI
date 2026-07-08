@@ -11,7 +11,7 @@ class Ativo:
         self.categoria = categoria
 
         self.hostname = ""
-        self.responsável = ""
+        self.responsavel = ""
         self.setor = ""
 
         self.vulnerabilidades = []

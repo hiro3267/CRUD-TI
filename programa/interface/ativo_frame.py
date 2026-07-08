@@ -10,6 +10,8 @@ class AtivoFrame(ttk.Frame):
 
         self.ativo = ativo
         self.on_remover = on_remover
+        self.vulnerabilidades = []
+        self.frames_vulnerabilidades = {}
 
         self.container = ttk.LabelFrame(
             self,
@@ -66,12 +68,12 @@ class AtivoFrame(ttk.Frame):
 
     def criar_area_vulnerabilidades(self):
 
-        self.label_vulnerabilidades = ttk.Label(
-            self.frame_vulnerabilidades,
-            text="Vulnerabilidades:"
+        self.frame_vulnerabilidades = ttk.LabelFrame(
+            self.container,
+        text="Vulnerabilidades"
         )
 
-        self.label_vulnerabilidades.pack(
+        self.frame_vulnerabilidades.pack(
             anchor="w",
             pady=(0, 5)
         )
@@ -80,7 +82,8 @@ class AtivoFrame(ttk.Frame):
         
         self.botao_add_vulnerabilidade = ttk.Button(
             self.frame_botoes,
-            text="Adicionar Vulnerabilidade"
+            text="Adicionar Vulnerabilidade",
+            command=self.adicionar_vulnerabilidade
         )
 
         self.botao_add_vulnerabilidade.pack(side="left")
@@ -111,7 +114,7 @@ class AtivoFrame(ttk.Frame):
             column=0,
             padx=5,
             pady=5,
-            stick="w"
+            sticky="w"
         )
 
         self.entry_hostname = ttk.Entry(self.frame_campos)
@@ -121,7 +124,12 @@ class AtivoFrame(ttk.Frame):
             column=1,
             padx=5,
             pady=5,
-            stick="ew"
+            sticky="ew"
+        )
+
+        self.entry_hostname.bind(
+            "<KeyRelease>",
+            self.atualizar_hostname
         )
 
         self.frame_campos.columnconfigure(1, weight=1)
@@ -138,7 +146,7 @@ class AtivoFrame(ttk.Frame):
             column=0,
             padx=5,
             pady=5,
-            stick="w"
+            sticky="w"
         )
 
         self.entry_responsavel = ttk.Entry(self.frame_campos)
@@ -148,7 +156,12 @@ class AtivoFrame(ttk.Frame):
             column=1,
             padx=5,
             pady=5,
-            stick="ew"
+            sticky="ew"
+        )
+
+        self.entry_responsavel.bind(
+            "<KeyRelease>",
+            self.atualizar_responsavel
         )
 
     def criar_campo_setor(self):
@@ -163,7 +176,7 @@ class AtivoFrame(ttk.Frame):
             column=0,
             padx=5,
             pady=5,
-            stick="w"
+            sticky="w"
         )
 
         self.entry_setor = ttk.Entry(self.frame_campos)
@@ -173,9 +186,58 @@ class AtivoFrame(ttk.Frame):
             column=1,
             padx=5,
             pady=5,
-            stick="ew"
+            sticky="ew"
+        )
+
+        self.entry_setor.bind(
+            "<KeyRelease>",
+            self.atualizar_setor
         )
 
     def excluir(self):
 
         self.on_remover(self.ativo)
+
+    def atualizar_hostname(self, event=None):
+
+        self.ativo.hostname = self.entry_hostname.get().strip()
+
+    def atualizar_responsavel(self, event=None):
+
+        self.ativo.responsavel = self.entry_responsavel.get().strip()
+
+    def atualizar_setor(self, event=None):
+
+        self.ativo.setor = self.entry_setor.get().strip()
+
+    def adicionar_vulnerabilidade(self):
+
+        vulnerabilidade = Vulnerabilidade()
+
+        self.ativo.vulnerabilidades.append(vulnerabilidade)
+        self.vulnerabilidades.append(vulnerabilidade)
+
+        frame = VulnerabilidadeFrame(
+            parent=self.frame_vulnerabilidades,
+            vulnerabilidade=vulnerabilidade,
+            on_remover=self.remover_vulnerabilidade
+        )
+
+        frame.pack(
+            fill="x",
+            padx=5,
+            pady=5
+        )
+
+        self.frames_vulnerabilidades[id(vulnerabilidade)] = frame
+
+    def remover_vulnerabilidade(self, vulnerabilidade):
+
+        if vulnerabilidade in self.ativo.vulnerabilidades:
+            self.ativo.vulnerabilidades.remove(vulnerabilidade)
+
+            if vulnerabilidade in self.vulnerabilidades:
+                self.vulnerabilidades.remove(vulnerabilidade)
+
+            frame = self.frames_vulnerabilidades.pop(id(vulnerabilidade))
+            frame.destroy()
