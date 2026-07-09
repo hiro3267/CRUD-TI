@@ -192,6 +192,8 @@ class App(tk.Tk):
 
         self.entry_id.delete(0, tk.END)
 
+        self.filtrar_ativos()
+
     def remover_ativo(self, ativo):
 
         if ativo in self.ativos:
@@ -202,6 +204,8 @@ class App(tk.Tk):
         frame = self.frames_ativos.pop(chave)
 
         frame.destroy()
+
+        self.filtrar_ativos()
 
     def filtrar_ativos(self, event=None):
 
@@ -232,9 +236,7 @@ class App(tk.Tk):
 
             if corresponde_busca and corresponde_categoria:
 
-                if not frame.winfo_ismapped():
-
-                    frame.pack(
+                frame.pack(
                     fill="x",
                     padx=5,
                     pady=5
@@ -254,7 +256,7 @@ class App(tk.Tk):
 
             tem_ativo_visivel = any(
                 ativo.categoria == categoria
-                and self.frames_ativos[(ativo.categoria, ativo.identificador)].winfo_ismapped()
+                and self.frames_ativos[(ativo.categoria, ativo.identificador)].winfo_manager() == "pack"
                 for ativo in self.ativos
             )
 
