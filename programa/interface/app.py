@@ -95,6 +95,28 @@ class App(tk.Tk):
             self.filtrar_ativos
         )
 
+        self.categoria_filtro_var = tk.StringVar(
+            value="Todas"
+        )
+
+        self.combo_filtro_categoria = ttk.Combobox(
+            self.frame_busca,
+            textvariable=self.categoria_filtro_var,
+            values=["Todas"] + CATEGORIAS,
+            state="readonly",
+            width=18
+        )
+
+        self.combo_filtro_categoria.pack(
+            side="left",
+            padx=(10, 0)
+        )
+
+        self.combo_filtro_categoria.bind(
+        "<<ComboboxSelected>>",
+        self.filtrar_ativos
+        )
+
     def criar_scroll(self):
 
         self.scroll = ScrollbarFrame(self)
@@ -184,6 +206,7 @@ class App(tk.Tk):
     def filtrar_ativos(self, event=None):
 
         termo = self.entry_busca.get().strip().lower()
+        categoria_filtro = self.categoria_filtro_var.get()
 
         for ativo in self.ativos:
 
@@ -197,12 +220,17 @@ class App(tk.Tk):
                 ativo.setor
             ]
 
-            encontrado = any(
+            corresponde_busca = any(
                 termo in campo.lower()
                 for campo in campos
             )
 
-            if encontrado:
+            corresponde_categoria = (
+                categoria_filtro == "Todas"
+                or ativo.categoria == categoria_filtro
+            )
+
+            if corresponde_busca and corresponde_categoria:
 
                 if not frame.winfo_ismapped():
 
@@ -215,3 +243,31 @@ class App(tk.Tk):
             else:
 
                 frame.pack_forget()
+
+        self.atualizar_visibilidade_categorias()
+
+    def atualizar_visibilidade_categorias(self):
+        
+        for categoria in CATEGORIAS:
+
+            frame_categoria = self.frames_categorias[categoria]
+
+            tem_ativo_visivel = any(
+                ativo.categoria == categoria
+                and self.frames_ativos[(ativo.categoria, ativo.identificador)].winfo_ismapped()
+                for ativo in self.ativos
+            )
+
+            if tem_ativo_visivel:
+
+                if not frame_categoria.winfo_ismapped():
+
+                    frame_categoria.pack(
+                        fill="x",
+                        padx=10,
+                        pady=5
+                    )
+
+            else:
+
+                frame_categoria.pack_forget()

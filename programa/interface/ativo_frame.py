@@ -30,7 +30,6 @@ class AtivoFrame(ttk.Frame):
         self.criar_frame_campos()
         self.criar_campos()
 
-        self.criar_frame_vulnerabilidades()
         self.criar_area_vulnerabilidades()
 
         self.criar_frame_botoes()
@@ -41,16 +40,6 @@ class AtivoFrame(ttk.Frame):
         self.frame_campos = ttk.Frame(self.container)
 
         self.frame_campos.pack(
-            fill="x",
-            padx=10,
-            pady=10
-        )
-
-    def criar_frame_vulnerabilidades(self):
-
-        self.frame_vulnerabilidades = ttk.LabelFrame(self.container)
-
-        self.frame_vulnerabilidades.pack(
             fill="x",
             padx=10,
             pady=10
@@ -236,8 +225,8 @@ class AtivoFrame(ttk.Frame):
         if vulnerabilidade in self.ativo.vulnerabilidades:
             self.ativo.vulnerabilidades.remove(vulnerabilidade)
 
-            if vulnerabilidade in self.vulnerabilidades:
-                self.vulnerabilidades.remove(vulnerabilidade)
+        if vulnerabilidade in self.vulnerabilidades:
+            self.vulnerabilidades.remove(vulnerabilidade)
 
-            frame = self.frames_vulnerabilidades.pop(id(vulnerabilidade))
-            frame.destroy()
+        frame = self.frames_vulnerabilidades.pop(id(vulnerabilidade))
+        frame.destroy()
