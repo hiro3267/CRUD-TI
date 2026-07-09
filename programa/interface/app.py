@@ -1,3 +1,4 @@
+import re
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -212,57 +213,58 @@ class App(tk.Tk):
         termo = self.entry_busca.get().strip().lower()
         categoria_filtro = self.categoria_filtro_var.get()
 
-        for ativo in self.ativos:
+        for categoria in CATEGORIAS:
 
-            chave = (ativo.categoria, ativo.identificador)
-            frame = self.frames_ativos[chave]
-
-            campos = [
-                ativo.identificador,
-                ativo.hostname,
-                ativo.responsavel,
-                ativo.setor
+            ativos_categoria = [
+                ativo for ativo in self.ativos
+                if ativo.categoria == categoria
             ]
 
-            corresponde_busca = any(
-                termo in campo.lower()
-                for campo in campos
+            ativos_categoria.sort(
+                key=lambda ativo: self.chave_ordenacao(ativo.identificador)
             )
 
-            corresponde_categoria = (
-                categoria_filtro == "Todas"
-                or ativo.categoria == categoria_filtro
-            )
+            algum_visivel = False
 
-            if corresponde_busca and corresponde_categoria:
+            for ativo in ativos_categoria:
 
-                frame.pack(
-                    fill="x",
-                    padx=5,
-                    pady=5
+                chave = (ativo.categoria, ativo.identificador)
+                frame = self.frames_ativos[chave]
+
+                campos = [
+                    ativo.identificador,
+                    ativo.hostname,
+                    ativo.responsavel,
+                    ativo.setor
+                ]
+
+                corresponde_busca = any(
+                    termo in campo.lower()
+                    for campo in campos
                 )
 
-            else:
+                corresponde_categoria = (
+                    categoria_filtro == "Todas"
+                    or ativo.categoria == categoria_filtro
+                )
 
                 frame.pack_forget()
 
-        self.atualizar_visibilidade_categorias()
+                if corresponde_busca and corresponde_categoria:
 
-    def atualizar_visibilidade_categorias(self):
-        
-        for categoria in CATEGORIAS:
+                    frame.pack(
+                        fill="x",
+                        padx=5,
+                        pady=5
+                    )
+
+                    algum_visivel = True
 
             frame_categoria = self.frames_categorias[categoria]
 
-            tem_ativo_visivel = any(
-                ativo.categoria == categoria
-                and self.frames_ativos[(ativo.categoria, ativo.identificador)].winfo_manager() == "pack"
-                for ativo in self.ativos
-            )
+            if algum_visivel:
 
-            if tem_ativo_visivel:
-
-                if not frame_categoria.winfo_ismapped():
+                if not frame_categoria.winfo_manager():
 
                     frame_categoria.pack(
                         fill="x",
@@ -273,3 +275,10 @@ class App(tk.Tk):
             else:
 
                 frame_categoria.pack_forget()
+
+    def chave_ordenacao(self, identificador):
+
+        return[
+            int(parte) if parte.isdigit() else parte.lower()
+            for parte in re.split(r"(\d+)", identificador)
+        ]
