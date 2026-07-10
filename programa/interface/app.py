@@ -87,6 +87,8 @@ class App(tk.Tk):
             padx=(10, 10)
         )
 
+        self.configurar_placeholder(self.entry_numero, PLACEHOLDER_ID)
+
         self.categoria_var = tk.StringVar(
             value=CATEGORIAS[0]
         )
