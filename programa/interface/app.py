@@ -1,10 +1,10 @@
-import re
 import tkinter as tk
 from tkinter import ttk, messagebox
 
 from interface.scrollbar import ScrollbarFrame
 from interface.ativo_frame import AtivoFrame
 from models.ativo import Ativo
+from services.filtro_service import FiltroService
 from utils.constantes import CATEGORIAS, PREFIXOS_CATEGORIA
 
 class App(tk.Tk):
@@ -234,47 +234,28 @@ class App(tk.Tk):
 
     def filtrar_ativos(self, event=None):
 
-        termo = self.entry_busca.get().strip().lower()
+        termo = self.entry_busca.get()
         categoria_filtro = self.categoria_filtro_var.get()
 
         for categoria in CATEGORIAS:
 
-            ativos_categoria = [
-                ativo for ativo in self.ativos
-                if ativo.categoria == categoria
-            ]
-
-            ativos_categoria.sort(
-                key=lambda ativo: self.chave_ordenacao(ativo.identificador)
+            ativos_categoria = FiltroService.filtrar_categoria(
+                self.ativos,
+                categoria,
+                termo,
+                categoria_filtro
             )
 
             algum_visivel = False
 
-            for ativo in ativos_categoria:
+            for ativo, visivel in ativos_categoria:
 
                 chave = (ativo.categoria, ativo.identificador)
                 frame = self.frames_ativos[chave]
 
-                campos = [
-                    ativo.identificador,
-                    ativo.hostname,
-                    ativo.responsavel,
-                    ativo.setor
-                ]
-
-                corresponde_busca = any(
-                    termo in campo.lower()
-                    for campo in campos
-                )
-
-                corresponde_categoria = (
-                    categoria_filtro == "Todas"
-                    or ativo.categoria == categoria_filtro
-                )
-
                 frame.pack_forget()
 
-                if corresponde_busca and corresponde_categoria:
+                if visivel:
 
                     frame.pack(
                         fill="x",
@@ -299,10 +280,3 @@ class App(tk.Tk):
             else:
 
                 frame_categoria.pack_forget()
-
-    def chave_ordenacao(self, identificador):
-
-        return[
-            int(parte) if parte.isdigit() else parte.lower()
-            for parte in re.split(r"(\d+)", identificador)
-        ]
