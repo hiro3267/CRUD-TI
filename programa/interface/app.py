@@ -5,7 +5,7 @@ from tkinter import ttk, messagebox
 from interface.scrollbar import ScrollbarFrame
 from interface.ativo_frame import AtivoFrame
 from models.ativo import Ativo
-from utils.constantes import CATEGORIAS
+from utils.constantes import CATEGORIAS, PREFIXOS_CATEGORIA
 
 class App(tk.Tk):
 
@@ -19,6 +19,7 @@ class App(tk.Tk):
         self.ids_existentes = set()
         self.frames_categorias = {}
         self.frames_ativos = {}
+        self.contadores_categoria = {categoria: 0 for categoria in CATEGORIAS}
 
         self.criar_interface()
 
@@ -27,6 +28,7 @@ class App(tk.Tk):
         self.criar_frame_busca()
         self.criar_scroll()
         self.criar_categorias()
+        self.filtrar_ativos()
 
     def criar_frame_controle(self):
         
@@ -38,12 +40,11 @@ class App(tk.Tk):
             pady=10
         )
 
-        self.entry_id = ttk.Entry(self.frame_controle)
+        self.entry_numero = ttk.Entry(self.frame_controle, width=10)
 
-        self.entry_id.pack(
+        self.entry_numero.pack(
             side="left",
-            padx=10,
-            pady=10
+            padx=(10, 10)
         )
 
         self.categoria_var = tk.StringVar(
@@ -84,18 +85,6 @@ class App(tk.Tk):
             pady=(0, 10)
         )
 
-        self.entry_busca = ttk.Entry(self.frame_busca)
-
-        self.entry_busca.pack(
-            fill="x",
-            expand=True
-        )
-
-        self.entry_busca.bind(
-            "<KeyRelease>",
-            self.filtrar_ativos
-        )
-
         self.categoria_filtro_var = tk.StringVar(
             value="Todas"
         )
@@ -116,6 +105,18 @@ class App(tk.Tk):
         self.combo_filtro_categoria.bind(
         "<<ComboboxSelected>>",
         self.filtrar_ativos
+        )
+
+        self.entry_busca = ttk.Entry(self.frame_busca)
+
+        self.entry_busca.pack(
+            fill="x",
+            expand=True
+        )
+
+        self.entry_busca.bind(
+            "<KeyRelease>",
+            self.filtrar_ativos
         )
 
     def criar_scroll(self):
@@ -150,24 +151,47 @@ class App(tk.Tk):
 
     def adicionar_ativo(self):
 
-        identificador = self.entry_id.get().strip()
         categoria = self.categoria_var.get()
+        prefixo = PREFIXOS_CATEGORIA[categoria]
 
-        if identificador =="":
-            messagebox.showwarning(
-                "Inválido",
-                "Informe um identificador para o ativo."
-            )
-            return
+        texto_numero = self.entry_numero.get().strip()
+
+        if texto_numero =="":
+            
+            self.contadores_categoria[categoria] += 1
+            numero = self.contadores_categoria[categoria]
+
+        else:
+
+            if not texto_numero.isdigit() or int(texto_numero) < 1:
+
+                messagebox.showwarning(
+                    "Inválido",
+                    "O número do ID deve ser um inteiro positivo."
+                )
+
+                return
         
-        chave = (categoria, identificador)
+            numero = int(texto_numero)
 
-        if chave in self.ids_existentes:
-            messagebox.showwarning(
-                "Inválido",
-                f"Já existe um ativo com o ID '{identificador}' na categoria '{categoria}'."
-            )
-            return
+            identificador = f"{prefixo}-{numero}"
+
+            if (categoria, identificador) in self.ids_existentes:
+
+                messagebox.showwarning(
+                    "Duplicado",
+                    f"Já existe um ativo com o ID '{identificador}'."
+                )
+
+                return
+        
+            if numero >= self.contadores_categoria[categoria]:
+
+                self.contadores_categoria[categoria] = numero
+        
+        identificador = f"{prefixo}-{numero}"
+
+        chave = (categoria, identificador)
 
         ativo = Ativo(
             identificador=identificador,
@@ -191,7 +215,7 @@ class App(tk.Tk):
 
         self.ativos.append(ativo)
 
-        self.entry_id.delete(0, tk.END)
+        self.entry_numero.delete(0, tk.END)
 
         self.filtrar_ativos()
 

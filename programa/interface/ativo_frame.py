@@ -1,7 +1,9 @@
+import tkinter as tk
 from tkinter import ttk
 from interface.vulnerabilidade_frame import VulnerabilidadeFrame
 from models.ativo import Ativo
 from models.vulnerabilidade import Vulnerabilidade
+from utils.constantes import CORES_INDICADOR_ATIVO
 
 class AtivoFrame(ttk.Frame):
 
@@ -13,9 +15,15 @@ class AtivoFrame(ttk.Frame):
         self.vulnerabilidades = []
         self.frames_vulnerabilidades = {}
 
-        self.container = ttk.LabelFrame(
+        self.label_titulo = tk.Label(
             self,
-            text=f"Ativo: {ativo.identificador}"
+            text=f"Ativo: {ativo.identificador}",
+            fg=CORES_INDICADOR_ATIVO["ok"]
+        )
+
+        self.container = ttk.Labelframe(
+            self,
+            labelwidget=self.label_titulo
         )
 
         self.container.pack(
@@ -24,6 +32,8 @@ class AtivoFrame(ttk.Frame):
         )
 
         self.criar_widgets()
+
+        self.atualizar_indicador()
 
     def criar_widgets(self):
 
@@ -209,7 +219,8 @@ class AtivoFrame(ttk.Frame):
         frame = VulnerabilidadeFrame(
             parent=self.frame_vulnerabilidades,
             vulnerabilidade=vulnerabilidade,
-            on_remover=self.remover_vulnerabilidade
+            on_remover=self.remover_vulnerabilidade,
+            on_mudanca=self.atualizar_indicador
         )
 
         frame.pack(
@@ -230,3 +241,23 @@ class AtivoFrame(ttk.Frame):
 
         frame = self.frames_vulnerabilidades.pop(id(vulnerabilidade))
         frame.destroy()
+
+        self.atualizar_indicador()
+
+    def atualizar_indicador(self):
+
+        estados = [v.status for v in self.ativo.vulnerabilidades]
+
+        if any(estado in ("Aberta", "Em Tratamento") for estado in estados):
+
+            situacao = "risco"
+
+        elif any(estado == "Aceita" for estado in estados):
+            situacao = "aceita"
+
+        else:
+            situacao = "ok"
+
+        self.container.configure(
+            style=f"Indicador{situacao.capitalize()}.TLabelframe"
+        )

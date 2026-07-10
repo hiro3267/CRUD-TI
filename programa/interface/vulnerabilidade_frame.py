@@ -1,19 +1,26 @@
 import tkinter as tk
 from tkinter import ttk
 from models.vulnerabilidade import Vulnerabilidade
-from utils.constantes import (TIPOS_VULNERABILIDADE, SEVERIDADES, STATUS_VULNERABILIDADES)
+from utils.constantes import (TIPOS_VULNERABILIDADE, SEVERIDADES, STATUS_VULNERABILIDADES, CORES_SEVERIDADE)
 
 class VulnerabilidadeFrame(ttk.Frame):
 
-    def __init__(self, parent, vulnerabilidade: Vulnerabilidade, on_remover):
+    def __init__(self, parent, vulnerabilidade: Vulnerabilidade, on_remover, on_mudanca=None):
         super().__init__(parent)
 
         self.vulnerabilidade = vulnerabilidade
         self.on_remover = on_remover
+        self.on_mudanca = on_mudanca
+
+        self.label_titulo = tk.Label(
+            self,
+            text="Vulnerabilidade",
+            fg=CORES_SEVERIDADE[SEVERIDADES[0]]
+        )
 
         self.container = ttk.LabelFrame(
             self,
-            text="Vulnerabilidade"
+            labelwidget=self.label_titulo
         )
 
         self.container.pack(
@@ -242,6 +249,13 @@ class VulnerabilidadeFrame(ttk.Frame):
 
         self.vulnerabilidade.severidade = self.severidade_var.get()
 
+        self.container.configure(
+            style=f"{self.vulnerabilidade.severidade}.TLabelframe"
+        )
+
     def atualizar_status(self, *args):
 
         self.vulnerabilidade.status = self.status_var.get()
+
+        if self.on_mudanca:
+            self.on_mudanca

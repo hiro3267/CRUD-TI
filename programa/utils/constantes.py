@@ -7,6 +7,15 @@ CATEGORIAS = [
     "Impressora"
 ]
 
+#Prefixos IDs
+PREFIXOS_CATEGORIA = {
+    "Notebook": "NB",
+    "Servidor": "SV",
+    "Roteador": "RT",
+    "Banco de Dados": "DB",
+    "Impressora": "IM"
+}
+
 #Tipos de Volnerabilidade
 TIPOS_VULNERABILIDADE = [
     "Software",
@@ -37,6 +46,13 @@ CORES_SEVERIDADE = {
     "Média": "orange",
     "Alta": "red",
     "Crítica": "purple"
+}
+
+#Cores dos status da vulnerabilidade
+CORES_INDICADOR_ATIVO = {
+    "risco":  "red",
+    "aceita": "goldernrod",
+    "ok":     "green"
 }
 
 #Placeholders
