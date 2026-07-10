@@ -258,6 +258,6 @@ class AtivoFrame(ttk.Frame):
         else:
             situacao = "ok"
 
-        self.container.configure(
-            style=f"Indicador{situacao.capitalize()}.TLabelframe"
+        self.label_titulo.config(
+            fg=CORES_INDICADOR_ATIVO[situacao]
         )

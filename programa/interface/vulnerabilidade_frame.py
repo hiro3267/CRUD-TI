@@ -249,8 +249,8 @@ class VulnerabilidadeFrame(ttk.Frame):
 
         self.vulnerabilidade.severidade = self.severidade_var.get()
 
-        self.container.configure(
-            style=f"{self.vulnerabilidade.severidade}.TLabelframe"
+        self.label_titulo.config(
+            fg=CORES_SEVERIDADE[self.vulnerabilidade.severidade]
         )
 
     def atualizar_status(self, *args):
@@ -258,4 +258,4 @@ class VulnerabilidadeFrame(ttk.Frame):
         self.vulnerabilidade.status = self.status_var.get()
 
         if self.on_mudanca:
-            self.on_mudanca
+            self.on_mudanca()

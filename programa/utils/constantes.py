@@ -51,7 +51,7 @@ CORES_SEVERIDADE = {
 #Cores dos status da vulnerabilidade
 CORES_INDICADOR_ATIVO = {
     "risco":  "red",
-    "aceita": "goldernrod",
+    "aceita": "goldenrod",
     "ok":     "green"
 }
 
