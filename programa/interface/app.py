@@ -5,7 +5,7 @@ from interface.scrollbar import ScrollbarFrame
 from interface.ativo_frame import AtivoFrame
 from models.ativo import Ativo
 from services.filtro_service import FiltroService
-from utils.constantes import CATEGORIAS, PREFIXOS_CATEGORIA
+from utils.constantes import CATEGORIAS, PREFIXOS_CATEGORIA, PLACEHOLDER_BUSCA, PLACEHOLDER_ID
 
 class App(tk.Tk):
 
@@ -29,6 +29,46 @@ class App(tk.Tk):
         self.criar_scroll()
         self.criar_categorias()
         self.filtrar_ativos()
+
+    def configurar_placeholder(self, entry, texto):
+
+        entry.placeholder = texto
+        entry.placeholder_ativo = False
+
+        self.exibir_placeholder(entry)
+
+        entry.bind(
+            "<FocusIn>",
+            lambda event: self.limpar_placeholder(entry)
+        )
+
+        entry.bind(
+            "<FocusOut>",
+            lambda event: self.exibir_placeholder(entry)
+        )
+
+    def exibir_placeholder(self, entry):
+
+        if not entry.get():
+
+            entry.insert(0, entry.placeholder)
+            entry.configure(foreground="grey")
+            entry.placeholder_ativo = True
+
+    def limpar_placeholder(self, entry):
+
+        if entry.placeholder_ativo:
+
+            entry.delete(0, tk.END)
+            entry.configure(foreground="black")
+            entry.placeholder_ativo = False
+
+    def obter_texto(self, entry):
+
+        if getattr(entry, "placeholder_ativo", False):
+            return ""
+        
+        return entry.get()
 
     def criar_frame_controle(self):
         
@@ -119,6 +159,8 @@ class App(tk.Tk):
             self.filtrar_ativos
         )
 
+        self.configurar_placeholder(self.entry_busca, PLACEHOLDER_BUSCA)
+
     def criar_scroll(self):
 
         self.scroll = ScrollbarFrame(self)
@@ -154,7 +196,7 @@ class App(tk.Tk):
         categoria = self.categoria_var.get()
         prefixo = PREFIXOS_CATEGORIA[categoria]
 
-        texto_numero = self.entry_numero.get().strip()
+        texto_numero = self.obter_texto(self.entry_numero).strip()
 
         if texto_numero =="":
             
@@ -216,6 +258,7 @@ class App(tk.Tk):
         self.ativos.append(ativo)
 
         self.entry_numero.delete(0, tk.END)
+        self.exibir_placeholder(self.entry_numero)
 
         self.filtrar_ativos()
 
@@ -234,7 +277,7 @@ class App(tk.Tk):
 
     def filtrar_ativos(self, event=None):
 
-        termo = self.entry_busca.get()
+        termo = self.obter_texto(self.entry_busca)
         categoria_filtro = self.categoria_filtro_var.get()
 
         for categoria in CATEGORIAS:

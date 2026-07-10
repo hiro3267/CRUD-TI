@@ -2,6 +2,7 @@ import re
 
 class FiltroService:
     
+    @staticmethod
     def chave_ordenação(identificador):
 
         return [
@@ -9,6 +10,8 @@ class FiltroService:
             for parte in re.split(r"(\d+)", identificador)
         ]
     
+
+    @classmethod
     def ordenar_ativos(cls, ativos):
 
         return sorted(
@@ -16,6 +19,8 @@ class FiltroService:
             key=lambda ativo: cls.chave_ordenação(ativo.identificador)
         )
     
+
+    @staticmethod
     def corresponde_busca(ativo, termo):
 
         campos = [
@@ -30,6 +35,7 @@ class FiltroService:
             for campo in campos
         )
     
+    @staticmethod
     def corresponde_categoria(ativo, categoria_filtro):
 
         return(
@@ -37,6 +43,7 @@ class FiltroService:
             or ativo.categoria == categoria_filtro
         )
     
+    @classmethod
     def corresponde(cls, ativo, termo, categoria_filtro):
 
         termo = termo.strip().lower()
@@ -46,6 +53,7 @@ class FiltroService:
             and cls.corresponde_categoria(ativo, categoria_filtro)
         )
     
+    @classmethod
     def filtrar_categoria(cls, ativos, categoria, termo, categoria_filtro):
         ativos_categoria = [
             ativo for ativo in ativos
