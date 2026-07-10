@@ -216,6 +216,12 @@ class AtivoFrame(ttk.Frame):
         self.ativo.vulnerabilidades.append(vulnerabilidade)
         self.vulnerabilidades.append(vulnerabilidade)
 
+        if not self.frame_vulnerabilidades.winfo_manager():
+            self.frame_vulnerabilidades.pack(
+                anchor="w",
+                pady=(0, 5)
+            )
+
         frame = VulnerabilidadeFrame(
             parent=self.frame_vulnerabilidades,
             vulnerabilidade=vulnerabilidade,
@@ -241,6 +247,9 @@ class AtivoFrame(ttk.Frame):
 
         frame = self.frames_vulnerabilidades.pop(id(vulnerabilidade))
         frame.destroy()
+
+        if not self.ativo.vulnerabilidades:
+            self.frame_vulnerabilidades.pack_forget()
 
         self.atualizar_indicador()
 
