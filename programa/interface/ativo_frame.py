@@ -7,7 +7,7 @@ from utils.constantes import CORES_INDICADOR_ATIVO
 
 class AtivoFrame(ttk.Frame):
 
-    def __init__(self, parent, ativo: Ativo, on_remover):
+    def __init__(self, parent, ativo: Ativo, on_remover, on_mudanca=None):
         super().__init__(parent)
 
         self.ativo = ativo
@@ -32,6 +32,8 @@ class AtivoFrame(ttk.Frame):
         )
 
         self.criar_widgets()
+
+        self.carregar_vulnerabilidades_existentes()
 
         self.atualizar_indicador()
 
@@ -126,6 +128,9 @@ class AtivoFrame(ttk.Frame):
             sticky="ew"
         )
 
+        if self.ativo.hostname:
+            self.entry_hostname.insert(0, self.ativo.hostname)
+
         self.entry_hostname.bind(
             "<KeyRelease>",
             self.atualizar_hostname
@@ -200,14 +205,17 @@ class AtivoFrame(ttk.Frame):
     def atualizar_hostname(self, event=None):
 
         self.ativo.hostname = self.entry_hostname.get().strip()
+        self.notificar_mudanca()
 
     def atualizar_responsavel(self, event=None):
 
         self.ativo.responsavel = self.entry_responsavel.get().strip()
+        self.notificar_mudanca()
 
     def atualizar_setor(self, event=None):
 
         self.ativo.setor = self.entry_setor.get().strip()
+        self.notificar_mudanca()
 
     def carregar_vulnerabilidades_existentes(self):
 
@@ -272,7 +280,7 @@ class AtivoFrame(ttk.Frame):
     def vulnerabilidade_mudou(self):
 
         self.atualizar_indicador()
-        self.atualizar_mudanca()
+        self.notificar_mudanca()
 
     def atualizar_indicador(self):
 
