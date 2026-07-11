@@ -209,6 +209,13 @@ class AtivoFrame(ttk.Frame):
 
         self.ativo.setor = self.entry_setor.get().strip()
 
+    def carregar_vulnerabilidades_existentes(self):
+
+        for vulnerabilidade in list(self.ativo.vulnerabilidades):
+
+            self.vulnerabilidades.append(vulnerabilidade)
+            self.criar_frame_vulnerabilidade(vulnerabilidade)
+
     def adicionar_vulnerabilidade(self):
 
         vulnerabilidade = Vulnerabilidade()
@@ -222,11 +229,17 @@ class AtivoFrame(ttk.Frame):
                 pady=(0, 5)
             )
 
+        self.criar_frame_vulnerabilidade(vulnerabilidade)
+
+        self.notificar_mudanca()
+
+    def criar_frame_vulnerabilidade(self, vulnerabilidade):
+
         frame = VulnerabilidadeFrame(
             parent=self.frame_vulnerabilidades,
             vulnerabilidade=vulnerabilidade,
             on_remover=self.remover_vulnerabilidade,
-            on_mudanca=self.atualizar_indicador
+            on_mudanca=self.vulnerabilidade_mudou
         )
 
         frame.pack(
@@ -236,6 +249,8 @@ class AtivoFrame(ttk.Frame):
         )
 
         self.frames_vulnerabilidades[id(vulnerabilidade)] = frame
+
+        return frame
 
     def remover_vulnerabilidade(self, vulnerabilidade):
 
@@ -252,6 +267,12 @@ class AtivoFrame(ttk.Frame):
             self.frame_vulnerabilidades.pack_forget()
 
         self.atualizar_indicador()
+        self.notificar_mudanca()
+
+    def vulnerabilidade_mudou(self):
+
+        self.atualizar_indicador()
+        self.atualizar_mudanca()
 
     def atualizar_indicador(self):
 
@@ -270,3 +291,8 @@ class AtivoFrame(ttk.Frame):
         self.label_titulo.config(
             fg=CORES_INDICADOR_ATIVO[situacao]
         )
+
+    def notificar_mudanca(self):
+
+        if self.on_mudanca:
+            self.on_mudanca()

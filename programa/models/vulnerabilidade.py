@@ -11,3 +11,22 @@ class Vulnerabilidade:
         self.tipo = tipo
         self.severidade = severidade
         self.status = status
+
+    def to_dict(self):
+
+        return {
+            "descrição": self.descricao,
+            "tipo": self.tipo,
+            "severidade": self.severidade,
+            "status": self.status
+        }
+    
+    @classmethod
+    def from_dict(cls, dados):
+
+        return cls(
+            descricao=dados.get("descricao", ""),
+            tipo=dados.get("tipo", ""),
+            severidade=dados.get("severidade", ""),
+            status=dados.get("status", "")
+        )

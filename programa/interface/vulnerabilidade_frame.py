@@ -241,9 +241,15 @@ class VulnerabilidadeFrame(ttk.Frame):
 
         self.vulnerabilidade.descricao = self.entry_descricao.get()
 
+        if self.on_mudanca:
+            self.on_mudanca()
+
     def atualizar_tipo(self, *args):
 
         self.vulnerabilidade.tipo = self.tipo_var.get()
+
+        if self.on_mudanca:
+            self.on_mudanca()
 
     def atualizar_severidade(self, *args):
 
@@ -252,6 +258,9 @@ class VulnerabilidadeFrame(ttk.Frame):
         self.label_titulo.config(
             fg=CORES_SEVERIDADE[self.vulnerabilidade.severidade]
         )
+
+        if self.on_mudanca:
+            self.on_mudanca()
 
     def atualizar_status(self, *args):
 

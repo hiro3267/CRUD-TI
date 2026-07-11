@@ -5,6 +5,7 @@ from interface.scrollbar import ScrollbarFrame
 from interface.ativo_frame import AtivoFrame
 from models.ativo import Ativo
 from services.filtro_service import FiltroService
+from database.ativo_repository import AtivoRepository
 from utils.constantes import CATEGORIAS, PREFIXOS_CATEGORIA, PLACEHOLDER_BUSCA, PLACEHOLDER_ID
 
 class App(tk.Tk):
@@ -23,11 +24,14 @@ class App(tk.Tk):
 
         self.criar_interface()
 
+        self.protocol("WM_DELETE_WINDOW", self.ao_fechar)
+
     def criar_interface(self):
         self.criar_frame_controle()
         self.criar_frame_busca()
         self.criar_scroll()
         self.criar_categorias()
+        self.carregar_dados()
         self.filtrar_ativos()
 
     def configurar_placeholder(self, entry, texto):
@@ -193,6 +197,13 @@ class App(tk.Tk):
 
             self.frames_categorias[categoria] = frame
 
+    def carregar_dados(self):
+
+        ativos_carregados = AtivoRepository.carregar()
+
+        for ativo in ativos_carregados:
+            self.registrar_ativo(ativo)
+
     def adicionar_ativo(self):
 
         categoria = self.categoria_var.get()
@@ -263,6 +274,37 @@ class App(tk.Tk):
         self.exibir_placeholder(self.entry_numero)
 
         self.filtrar_ativos()
+        self.salvar_dados()
+
+    def registrar_ativo(self, ativo):
+
+        chave = (ativo.categoria, ativo.identificador)
+
+        prefixo = PREFIXOS_CATEGORIA[ativo.categoria]
+        numero = int(ativo.identificador.replace(f"{prefixo}-", ""))
+
+        if numero >= self.contadores_categoria[ativo.categoria]:
+            self.contadores_categoria[ativo.categoria] = numero
+
+        frame = AtivoFrame(
+            parent=self.frames_categorias[ativo.categoria],
+            ativo=ativo,
+            on_remover=self.remover_ativo,
+            on_mudanca=self.salvar_dados,
+        )
+
+        frame.pack(
+            fill="x",
+            padx=5,
+            pady=5
+        )
+
+        self.ids_existentes.add(chave)
+        self.frames_ativos[chave] = frame
+
+        self.ativos.append(ativo)
+
+        return frame
 
     def remover_ativo(self, ativo):
 
@@ -276,6 +318,16 @@ class App(tk.Tk):
         frame.destroy()
 
         self.filtrar_ativos()
+        self.salvar_dados()
+
+    def salvar_dados(self):
+
+        AtivoRepository.salvar(self.ativos)
+
+    def ao_fechar(self):
+
+        self.salvar_dados()
+        self.destroy()
 
     def filtrar_ativos(self, event=None):
 
