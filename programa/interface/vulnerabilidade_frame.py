@@ -90,6 +90,9 @@ class VulnerabilidadeFrame(ttk.Frame):
             sticky="ew"
         )
 
+        if self.vulnerabilidade.descricao:
+            self.entry_descricao.insert (0, self.vulnerabilidade.descricao)
+
         self.entry_descricao.bind(
             "<KeyRelease>",
             self.atualizar_descricao
@@ -113,7 +116,7 @@ class VulnerabilidadeFrame(ttk.Frame):
         )
 
         self.tipo_var = tk.StringVar(
-            value=TIPOS_VULNERABILIDADE[0]
+            value=self.vulnerabilidade.tipo or TIPOS_VULNERABILIDADE[0]
         )
 
         self.combo_tipo = ttk.Combobox(
@@ -154,7 +157,7 @@ class VulnerabilidadeFrame(ttk.Frame):
         )
 
         self.severidade_var = tk.StringVar(
-            value=SEVERIDADES[0]
+            value=self.vulnerabilidade.severidade or SEVERIDADES[0]
         )
 
         self.combo_severidade = ttk.Combobox(
@@ -195,7 +198,7 @@ class VulnerabilidadeFrame(ttk.Frame):
         )
 
         self.status_var = tk.StringVar(
-            value=STATUS_VULNERABILIDADES[0]
+            value=self.vulnerabilidade.status or STATUS_VULNERABILIDADES[0]
         )
 
         self.combo_status = ttk.Combobox(

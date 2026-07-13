@@ -29,7 +29,7 @@ class Ativo:
             "responsavel": self.responsavel,
             "setor": self.setor,
             "vulnerabilidades": [
-                Vulnerabilidade.to_dict()
+                vulnerabilidade.to_dict()
                 for vulnerabilidade in self.vulnerabilidades
             ]
         }

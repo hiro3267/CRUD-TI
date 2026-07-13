@@ -15,7 +15,7 @@ class Vulnerabilidade:
     def to_dict(self):
 
         return {
-            "descrição": self.descricao,
+            "descricao": self.descricao,
             "tipo": self.tipo,
             "severidade": self.severidade,
             "status": self.status

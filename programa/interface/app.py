@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 
 from interface.scrollbar import ScrollbarFrame
 from interface.ativo_frame import AtivoFrame
@@ -118,6 +118,28 @@ class App(tk.Tk):
         self.botao_adicionar.pack(
             side="left",
             padx=(10, 0)
+        )
+
+        self.botao_salvar_como = ttk.Button(
+            self.frame_controle,
+            text="Salvar como...",
+            command=self.salvar_como
+        )
+
+        self.botao_salvar_como.pack(
+            side="right",
+            pady=(10, 0)
+        )
+
+        self.botao_abrir = ttk.Button(
+            self.frame_controle,
+            text="Abrir...",
+            command=self.abrir_arquivo
+        )
+
+        self.botao_abrir.pack(
+            side="right",
+            pady=(10, 0)
         )
 
     def criar_frame_busca(self):
@@ -256,7 +278,8 @@ class App(tk.Tk):
         frame = AtivoFrame(
             parent=self.frames_categorias[categoria],
             ativo=ativo,
-            on_remover=self.remover_ativo
+            on_remover=self.remover_ativo,
+            on_mudanca=self.salvar_dados
         )
 
         frame.pack(
@@ -323,6 +346,62 @@ class App(tk.Tk):
     def salvar_dados(self):
 
         AtivoRepository.salvar(self.ativos)
+
+    def salvar_como(self):
+
+        caminho = filedialog.asksaveasfilename(
+            title="Salvar como",
+            defaultextension=".json",
+            filetypes=[("Arquivos JSON", "*.json"), ("Todos os arquivos", "*.*")]
+        )
+
+        if not caminho:
+            return
+        
+        AtivoRepository.exportar(self.ativos, caminho)
+
+        messagebox.showinfo(
+            "Salvo",
+            f"Arquivo salvo em:\n{caminho}"
+        )
+
+    def abrir_arquivo(self):
+
+        caminho = filedialog.askopenfilename(
+            title="Abrir arquivo JSON",
+            filetypes=[("Arquivos JSON", "*.json"), ("Todos os arquivos", "*.*")]
+        )
+
+        if not caminho:
+            return
+        
+        try:
+            ativos_carregados = AtivoRepository.importar(caminho)
+
+        except Exception:
+            messagebox.showerror(
+                "Erro",
+                "Não foi possível abrir o arquivo selecionado"
+            )
+            return
+
+        self.limpar_ativos()
+
+        for ativo in    ativos_carregados:
+            self.registrar_ativo(ativo)
+
+        self.filtrar_ativos()
+        self.salvar_dados()
+
+    def limpar_ativos(self):
+
+        for frame in self.frames_ativos.values():
+            frame.destroy()
+
+        self.ativos = []
+        self.ids_existentes = set()
+        self.frames_ativos = {}
+        self.contadores_categoria = {categoria: 0 for categoria in CATEGORIAS}
 
     def ao_fechar(self):
 

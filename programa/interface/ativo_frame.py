@@ -12,6 +12,7 @@ class AtivoFrame(ttk.Frame):
 
         self.ativo = ativo
         self.on_remover = on_remover
+        self.on_mudanca = on_mudanca
         self.vulnerabilidades = []
         self.frames_vulnerabilidades = {}
 
@@ -163,6 +164,9 @@ class AtivoFrame(ttk.Frame):
             sticky="ew"
         )
 
+        if self.ativo.responsavel:
+            self.entry_responsavel.insert(0, self.ativo.responsavel)
+
         self.entry_responsavel.bind(
             "<KeyRelease>",
             self.atualizar_responsavel
@@ -192,6 +196,9 @@ class AtivoFrame(ttk.Frame):
             pady=5,
             sticky="ew"
         )
+
+        if self.ativo.setor:
+            self.entry_setor.insert(0, self.ativo.setor)
 
         self.entry_setor.bind(
             "<KeyRelease>",
