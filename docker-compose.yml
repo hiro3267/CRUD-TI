@@ -1,0 +1,10 @@
+services:
+  crud-ti:
+    build: .
+    image: crud-ti
+    container_name: crud-ti-test
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ./data:/app/data

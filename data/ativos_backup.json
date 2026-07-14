@@ -1,0 +1,17 @@
+[
+  {
+    "identificador": "NB-1",
+    "categoria": "Notebook",
+    "hostname": "a",
+    "responsavel": "b",
+    "setor": "c",
+    "vulnerabilidades": [
+      {
+        "descricao": "a",
+        "tipo": "Hardware",
+        "severidade": "Baixa",
+        "status": "Aberta"
+      }
+    ]
+  }
+]
