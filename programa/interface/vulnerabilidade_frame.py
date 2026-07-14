@@ -11,11 +11,20 @@ class VulnerabilidadeFrame(ttk.Frame):
         self.vulnerabilidade = vulnerabilidade
         self.on_remover = on_remover
         self.on_mudanca = on_mudanca
+        self.expandido = False
 
         self.label_titulo = tk.Label(
             self,
             text="Vulnerabilidade",
-            fg=CORES_SEVERIDADE[SEVERIDADES[0]]
+            fg=CORES_SEVERIDADE[SEVERIDADES[0]],
+            cursor="hand2",
+            padx=8,
+            pady=6
+        )
+
+        self.label_titulo.bind(
+            "<Button-1>",
+            self.alternar
         )
 
         self.container = ttk.LabelFrame(
@@ -25,10 +34,40 @@ class VulnerabilidadeFrame(ttk.Frame):
 
         self.container.pack(
             fill="x",
-            expand=True
         )
 
+        self.conteudo = ttk.Frame(self.container)
+
         self.criar_widgets()
+
+    def texto_titulo(self):
+ 
+        seta = "▾" if self.expandido else "▸"
+ 
+        descricao = self.vulnerabilidade.descricao
+ 
+        if descricao:
+            return f"{seta} Vulnerabilidade: {descricao}"
+ 
+        return f"{seta} Vulnerabilidade"
+ 
+    def alternar(self, event=None):
+ 
+        self.expandido = not self.expandido
+ 
+        if self.expandido:
+ 
+            self.conteudo.pack(
+                fill="x",
+            )
+ 
+        else:
+ 
+            self.conteudo.pack_forget()
+ 
+        self.label_titulo.config(text=self.texto_titulo())
+
+        self.update_idletasks()
 
     def criar_widgets(self):
 
@@ -40,7 +79,7 @@ class VulnerabilidadeFrame(ttk.Frame):
 
     def criar_frame_campos(self):
         
-        self.frame_campos = ttk.Frame(self.container)
+        self.frame_campos = ttk.Frame(self.conteudo)
 
         self.frame_campos.pack(
             fill="x",
@@ -50,7 +89,7 @@ class VulnerabilidadeFrame(ttk.Frame):
 
     def criar_frame_botoes(self):
         
-        self.frame_botoes = ttk.Frame(self.container)
+        self.frame_botoes = ttk.Frame(self.conteudo)
 
         self.frame_botoes.pack(
             fill="x",

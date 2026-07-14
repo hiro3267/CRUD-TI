@@ -15,11 +15,20 @@ class AtivoFrame(ttk.Frame):
         self.on_mudanca = on_mudanca
         self.vulnerabilidades = []
         self.frames_vulnerabilidades = {}
+        self.expandido = False
 
         self.label_titulo = tk.Label(
             self,
             text=f"Ativo: {ativo.identificador}",
-            fg=CORES_INDICADOR_ATIVO["ok"]
+            fg=CORES_INDICADOR_ATIVO["ok"],
+            cursor="hand2",
+            padx=8,
+            pady=6
+        )
+
+        self.label_titulo.bind(
+            "<Button-1>",
+            self.alternar
         )
 
         self.container = ttk.Labelframe(
@@ -29,14 +38,41 @@ class AtivoFrame(ttk.Frame):
 
         self.container.pack(
             fill="x",
-            expand=True
         )
+
+        self.conteudo = ttk.Frame(self.container)
 
         self.criar_widgets()
 
         self.carregar_vulnerabilidades_existentes()
 
         self.atualizar_indicador()
+
+        self.update_idletasks
+
+    def texto_titulo(self):
+ 
+        seta = "▾" if self.expandido else "▸"
+ 
+        return f"{seta} Ativo: {self.ativo.identificador}"
+    
+    def alternar(self, event=None):
+
+        self.expandido = not self.expandido
+
+        if self.expandido:
+
+            self.conteudo.pack(
+                fill="x",
+            )
+
+        else:
+
+            self.conteudo.pack_forget()
+
+        self.label_titulo.config(text=self.texto_titulo())
+
+        self.update_idletasks
 
     def criar_widgets(self):
 
@@ -50,7 +86,7 @@ class AtivoFrame(ttk.Frame):
 
     def criar_frame_campos(self):
 
-        self.frame_campos = ttk.Frame(self.container)
+        self.frame_campos = ttk.Frame(self.conteudo)
 
         self.frame_campos.pack(
             fill="x",
@@ -60,7 +96,7 @@ class AtivoFrame(ttk.Frame):
 
     def criar_frame_botoes(self):
         
-        self.frame_botoes = ttk.Frame(self.container)
+        self.frame_botoes = ttk.Frame(self.conteudo)
 
         self.frame_botoes.pack(
             fill="x",
@@ -71,7 +107,7 @@ class AtivoFrame(ttk.Frame):
     def criar_area_vulnerabilidades(self):
 
         self.frame_vulnerabilidades = ttk.LabelFrame(
-            self.container,
+            self.conteudo,
         text="Vulnerabilidades"
         )
 
