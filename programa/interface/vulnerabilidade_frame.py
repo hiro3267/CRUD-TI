@@ -14,12 +14,19 @@ class VulnerabilidadeFrame(ttk.Frame):
         self.expandido = False
 
         self.label_titulo = tk.Label(
-            self,
-            text="Vulnerabilidade",
-            fg=CORES_SEVERIDADE[SEVERIDADES[0]],
-            cursor="hand2",
-            padx=8,
-            pady=6
+        self,
+        fg=CORES_SEVERIDADE[SEVERIDADES[0]],
+        cursor="hand2",
+        padx=10,
+        pady=8,
+        anchor="w",
+        relief="groove",
+        bd=1,
+        font=("Segoe UI", 10, "bold")
+    )
+
+        self.label_titulo.pack(
+            fill="x"
         )
 
         self.label_titulo.bind(
@@ -27,16 +34,9 @@ class VulnerabilidadeFrame(ttk.Frame):
             self.alternar
         )
 
-        self.container = ttk.LabelFrame(
-            self,
-            labelwidget=self.label_titulo
-        )
+        self.conteudo = ttk.Frame(self)
 
-        self.container.pack(
-            fill="x",
-        )
-
-        self.conteudo = ttk.Frame(self.container)
+        self.label_titulo.config(text=self.texto_titulo())
 
         self.criar_widgets()
 
@@ -59,6 +59,8 @@ class VulnerabilidadeFrame(ttk.Frame):
  
             self.conteudo.pack(
                 fill="x",
+                padx=10,
+                pady=(0, 8)
             )
  
         else:

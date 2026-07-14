@@ -19,28 +19,23 @@ class AtivoFrame(ttk.Frame):
 
         self.label_titulo = tk.Label(
             self,
-            text=f"Ativo: {ativo.identificador}",
-            fg=CORES_INDICADOR_ATIVO["ok"],
             cursor="hand2",
-            padx=8,
-            pady=6
+         padx=8,
+         pady=6,
+         anchor="w",
+         font=("Segoe UI", 10, "bold")
         )
+
+        self.label_titulo.pack(fill="x")
 
         self.label_titulo.bind(
             "<Button-1>",
             self.alternar
         )
 
-        self.container = ttk.Labelframe(
-            self,
-            labelwidget=self.label_titulo
-        )
+        self.conteudo = ttk.Frame(self)
 
-        self.container.pack(
-            fill="x",
-        )
-
-        self.conteudo = ttk.Frame(self.container)
+        self.label_titulo.config(text=self.texto_titulo())
 
         self.criar_widgets()
 
@@ -48,7 +43,7 @@ class AtivoFrame(ttk.Frame):
 
         self.atualizar_indicador()
 
-        self.update_idletasks
+        self.update_idletasks()
 
     def texto_titulo(self):
  
@@ -64,6 +59,8 @@ class AtivoFrame(ttk.Frame):
 
             self.conteudo.pack(
                 fill="x",
+                padx=10,
+                pady=(0, 8)
             )
 
         else:
@@ -72,7 +69,7 @@ class AtivoFrame(ttk.Frame):
 
         self.label_titulo.config(text=self.texto_titulo())
 
-        self.update_idletasks
+        self.update_idletasks()
 
     def criar_widgets(self):
 
